@@ -1,0 +1,86 @@
+<!--#include file="header.htm" -->
+<div id="content">
+
+<!--div id="status">
+	<div id="loading" style="display:none">Error:<br />Connection to demo board was lost.</div>
+	<div id="display">
+	<span style="float:right;font-size:9px;font-weight:normal;padding-top:8px;text-indent:0px">(click to toggle)</span>
+		<p>LED:<br /><span class="le
+	    <a id="led2" onclick="newAJAXCommand('leds.cgi?led=2');">&bull;</a>
+		<a id="led1" onclick="newAJAXCommand('leds.cgi?led=1');">&bull;</a>
+		<a id="led0" onclick="newAJAXCommand('leds.cgi?led=0');">&bull;</a>
+		</span></p>
+		<p>Buttons:<br />
+		<span id="btn2">?</span> &nbsp;
+		<span id="btn1">?</span> &nbsp;
+		<span id="btn0">?</span></p>
+		<p>Random Number: <span id="pot0" style="font-weight:normal">?</span></p>
+	</div>
+</div-->
+
+
+<table style="padding-left: 10px;">
+<tr><td><b>LED_O Version:</b></td><td>&nbsp;</td><td>~version~</td></tr>
+<tr><td><b>Build Date:</b></td><td>&nbsp;</td><td>~builddate~</td></tr>
+</table>
+
+<p>LED_O is an Alarm/Informtion display for industry using a Modbus TCP Server model.</p>
+
+<p>LED_O is a 360&deg display that can be used to display information in a 360&deg view. It is a 15bit color display with a resolution of 128x64 pixels. The display is capable of displaying text, shapes, bitmaps and fill colors. The display is controlled by a modbus TCP client and can be used to display real-time data.</p>
+<p>The device can concurrently display numeric values, linked to graphics.</p>
+
+<h2>Key Features</h2>
+
+<ul>
+<li><b>360&deg </b>display of real-time data</li>
+<li><b>Text, Shapes, Bitmaps and fill</b> animation creates a revolving light effect.</li>
+<li><b>Modbus TCP Server</b>connects to a modbus tcp client</li>
+<li><b>Customizable</b> bitmaps.</li>
+<li><b>15bit</b> full color display, losses of color are in the lighter shades.</li>
+<li><b>Analog Value display</b> can directly recieve data as either integer or real.
+<li><b>Aditional bitmaps</b> can be uploaded to be added to the 6 installed as default.</li>
+</ul>
+
+
+<p>For more information on LED_O refer to the manual downloadable from the &ltwww.mes_ledo.com&gt.</p>
+
+</div>
+
+<script type="text/javascript">
+// Parses the xmlResponse from status.xml and updates the status box
+function updateStatus(xmlData) {
+	var mainstat = document.getElementById('display').style.display;
+	var loadstat = document.getElementById('loading').style.display;
+
+	// Check if a timeout occurred
+	if(!xmlData)
+	{
+		mainstat = 'none';
+		loadstat = 'inline';
+		return;
+	}
+
+	// Make sure we're displaying the status display
+	mainstat = 'inline';
+	loadstat = 'none';
+
+	// Loop over all the LEDs
+	for(i = 0; i < 3; i++) // Temporarily change 3 to 1
+		document.getElementById('led' + i).style.color = (getXMLValue(xmlData, 'led' + i) == '1') ? '#090' : '#ddd';
+
+	// Loop over all the buttons
+	for(i = 0; i < 3; i++)
+		document.getElementById('btn' + i).innerHTML = (getXMLValue(xmlData, 'btn' + i) == 'up') ? '&Lambda;' : 'V';
+
+	// Update the POT value
+	document.getElementById('pot0').innerHTML = getXMLValue(xmlData, 'pot0');
+}
+setTimeout("newAJAXCommand('status.xml', updateStatus, true)",500);
+</script>
+
+<script type="text/javascript">
+<!--
+document.getElementById('hello').innerHTML = "~hellomsg~";
+//-->
+</script>
+<!--#include file="footer.htm" -->

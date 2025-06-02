@@ -1,0 +1,138 @@
+<!--#include file="header.htm" -->
+<div id="content">
+
+<h1>Upload Bitmaps</h1>
+
+<p> Upload bitmaps to the microSD card, file name must not exceed 60 characters.
+<br>Bitmaps are stored in the root directory of the microSD card.
+<br>Only one bitmap can be uploaded at a time.
+<br>Bitmaps must be in 16 bit color format, 32x32 or 32x64 pixels.
+<br>There is a 20 Bitmap limit, the first 20 bitmaps are used.
+</p>
+
+<form action="upload.htm" method="post" enctype="multipart/form-data">
+<!--div id="loading" style="display:none">Error:<br />Connection to demo board was lost.</div-->
+<div class="examplebox" id="display">>
+~uploadedmd5~
+<p style="margin-bottom: 2px"><b>File: </b>&nbsp;
+<input type="file" name="md5file" size="30" accept=".bmp"/> &nbsp;
+<input type="submit" value="UPLOAD"/>
+</p>
+<p>Number of Bitmaps available: <span id="pot1" style="font-weight:normal">~bmp_num~</span></p>
+</div>
+
+
+<div id="table">
+    <p>Listed below are the offsets of the bitmaps for use with mb register 08.<br><br></p>
+    <h3 style="font-weight: bold;">Offset&nbsp;&nbsp;Bitmap</h3>
+    <ol id="parent" start="0">	
+    </ol>
+    </div> 
+    </form>
+    <!--input type="submit"  value="List Bitmaps" 
+           onclick="newAJAXCommand('get_bmp.xml',getName,false);" 
+           style="margin-top:5px;"
+           style="margin-top:5px;"/-->
+
+</div>
+
+<script type="text/javascript">
+ 
+function getName(xmlData) {
+    if (!xmlData) {
+        alert("No xml data!");
+    }
+    var select = document.querySelector('select[name="bmp"]'); // Target the select element
+    var selectedValue = select.value; // Get the selected value
+    var bmpName = 'bmp' + selectedValue; // Get the name of the selected bitmap
+    console.log("bmpName: ",bmpName); // Log the selected value
+    var bmpVal = getXMLValue(xmlData, bmpName); // Add text to the li tag
+    var li = document.getElementById('li' + selectedValue); // Get the option element by id
+    console.log("li: ",li.innerHTML); // Log the selected value
+    console.log("bmpVal: ",bmpVal); // Log the selected value
+
+    if( li.innerHTML === '' && bmpVal !== '') {
+        console.log("li.innerHTML: ",li.innerHTML); // Log the selected value
+        var ol = document.getElementById("parent");
+        var li = document.createElement('li');
+        li.textContent = bmpVal; // Add text to the li tag
+        ol.appendChild(li);
+    } else {
+        if (li.innerHTML === bmpVal) {
+            alert("No bitmap not changed!");
+            console.log("No bitmap not changed!");
+        }
+    } 
+}
+
+function getBmp(xmlData, val) {
+    if (!xmlData) {
+        alert("No xml data!");
+    }
+    var ol = document.getElementById("parent");
+    var li = document.createElement('li');
+    li.textContent = getXMLValue(xmlData, 'bmp'+val); // Add text to the li tag
+    ol.appendChild(li);
+}
+
+// Parses the xmlResponse from status.xml and updates the status box
+function updateList(xmlData) {
+    if(!xmlData){
+	  alert("No xml data!");
+	}
+  	document.getElementById('pot1').innerHTML = getXMLValue(xmlData, 'pot2');	
+
+    newAJAXCommand('get_bmp.xml', updateList_, false);
+}
+
+function updateList_(xmlData) {
+    if (!xmlData) {
+        alert("No xml data!");
+    }
+    var ol = document.getElementById("pot1").innerHTML; // Get the number of bitmaps
+    var num_bmps = parseInt(ol, 10); // Convert to an integer
+    for (var i = 0; i < num_bmps; i++) {
+
+		//listBmps(xmlData, i); // Call listBmps with the current index
+        // Use a closure to pass the second argument (i)
+        (function(index) {
+            newAJAXCommand('get_bmp.xml', function(xmlData) {
+                listBmps(xmlData, index); // Pass the response and the index
+            });
+        })(i);
+    }
+}
+
+function listBmps(xmlData, val) {
+    if (!xmlData) {
+        alert("No xml data!");
+    }
+
+    var ol = document.getElementById("parent");
+    var li = document.createElement('li');
+    li.setAttribute('id', 'li' + val); // Set the id attribute
+
+    // Create key and value with a gap
+    var gap = document.createTextNode(' - '); // Add a gap (e.g., a dash or space)
+
+    var value = document.createElement('span');
+    value.textContent = getXMLValue(xmlData, 'bmp' + val); // Example value
+
+    // Append key, gap, and value to the li
+    li.appendChild(document.createTextNode('\u00A0')); // Add a space before the key
+    li.appendChild(gap);
+    li.appendChild(value);
+
+
+  //  li.textContent = getXMLValue(xmlData, 'bmp' + val); // Add text to the li tag
+    ol.appendChild(li);
+}
+
+setTimeout("newAJAXCommand('status.xml',updateList, false)",500);
+</script>
+<script type="text/javascript">
+<!--
+document.getElementById('hello').innerHTML = "~hellomsg~";
+-->
+</script>
+<!--#include file="footer.htm" -->

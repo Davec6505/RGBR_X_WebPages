@@ -1,0 +1,94 @@
+<!--#include file="header.htm" -->
+<div id="content">
+
+<h1>Modbus TCP</h1>
+<p>The LED_O display communicates via Modbus TCP to a client. See function codes below!</p>
+<h2>Function Codes in hex</h2>
+<ul>
+	<li><b>01</b> - Set control bits 0-8.</li>
+	<li><b>03</b> - Read multiple input registers used by display 0 - 99.</li>
+	<li><b>04 / 06</b> -  Write/Read single display register 0 - 99.</li>
+	<li><b>10</b> - Write multiple registers to display 0 - 99.</li>
+</ul>
+
+<h2>Control register mappings</h2>
+0 - 99 zero indexed registers are used to control LED_O.<p>
+		<p><i>40000 - 40099 registers are not supported by this device.</i><br />
+<ul>
+<li><b>0 - 3 </b>: [XStart, YStart, XEnd, YEnd].</li>
+<li><b>4 - 7 </b>: [Shape, Quantity, Weight, Color].
+<ul class="sub-list">
+	<li><i>Shape</i>   - [Rectangle, Circle, Triangle].</li>
+	<li><i>Quantity</i>- Shapes quantity cannot exceed the total pixel width (128) / Shape width (shape width uses [XStart - XEnd] = width).
+	<li><i>Weight</i>  - Weight of the shape is the thickness of the edges in pixels.
+	<li><i>Color</i>   - Color has a 15bit range with a 25&#37 loss in the lighter areas of RGB, R=63488,G=28180,B=31. Lower levels of color density are limited.
+</ul></li>
+<li><b>8 - 9 </b>: [Bitmap, Quantity]
+<ul class="sub-list">
+	<li><i>Bitmaps</i>    - [Warning, Danger, ...]</li>
+	<li><i>Quantity</i>   - Quantity Cannot exceed (screen width / bitmap width),bitmaps should be either 32 pixels or 64 pixels in width.  
+</ul></li>
+<li><b>10 - 11</b>: [Border Weight, Color]
+<ul class="sub-list">
+	<li><i>Border weight</i>- Places a band of n pixels in depth on the top and bottom of the display, can be used to highlight text.</li>
+</ul></li>
+<li><b>12 - 15</b>: [Text XPos, Text YPos, Text Color, Font type]
+<ul class="sub-list">
+	<li>Text x and y postioins in pixels, Y position will can be used to centralize the text.</li>
+	<li>Shape color above applies to text color.
+</ul></li>
+<li><b>16 - 17</b>: [SI Unit, Decimal place].
+<ul class="sub-list">
+	<li><i>SI Unit</i>   - ["*C","*F","g","Kg","T","ml","l","%","ms","mm","rpm"] value of index controls SI Unit displayed.</li>
+	<li><i>Decimal</i>   - Sets the floating point accuracy in decimal places, max = 4.
+</ul></li>
+<li><b>18 - 23</b>: [LO-Limit, Hi-Limit, Alarm Lo-Limit, Alarm Hi-Limit, Alarm Lo-Limit Color, Alarm Hi-Color].
+<ul class="sub-list">
+	<li><i>Lo-Limit / Hi-Limit</i>- Scale the Bar graph displayed for analog values, [...].
+	<li><i>Alarm Limits</i>       - Set the limits from the analog value to change color of the bar graph.
+	<li><i>Alarm Colors</i>       - Shape colors apply.
+</ul></li>
+<li><b>24 - 25</b>: [Rotation direction, Rotation speed].
+<ul class="sub-list">
+	<li><i>Direction</i>          - 0 = Left to right -&gt, 1 = right to left &lt-.</li>
+	<li><i>Speed</i>			  - Speed is delay time between frames, fastest = 1, &gt 1 slows speed according to complexity of frame.</li>
+</ul></li>
+<li><b>26 - 27</b>: [Fill Screen, Fill color].
+<ul class="sub-list">
+	<li><i>Fill</i>				  - Fill the screen with one color.</li>
+	<li><i>Color<i>				  - Indipendant color to fill the screen, this differs from text and shape colors.</li>
+</ul></li>
+<li><b>30 - 59</b>: [Text].
+	<ul class="sub-list">
+		<li><i>Text</i>           - 30 characters max in buffer. display will only show +/- 16 depending on the font selected.</li>
+	</ul></li>
+<li><b>60 - 79</b>: [Integer values].
+	<ul class="sub-list">
+		<li><i>Integer</i>        - 10 holding integer values but only the 1st interger value at #60 will be displayed.</li>
+	</ul></li>
+<li><b>80 - 89</b>: [Real values].
+	<ul class="sub-list">
+		<li><i>Read & Write</i>   - 2 holding real values, but only the 1st real value at #80 will be displayed.</li>
+	</ul></li>
+<li><b>90 - 99</b>: [Real values].
+	<ul class="sub-list">
+		<li><i>Read only</i>      - 2 read only real values none will be displayed, reserved for future use.</li>
+	</ul></li>
+</ul>
+<br><br>
+
+<h3 class="exercise">Status register</h3>
+<p class="examplebox">[String,Shape,Bitmap,Direction,Border,Fill,Clear,Rotate]</p>
+<div class="examplebox code" style="letter-spacing: 10px">
+~led(7)~ ~led(6)~ ~led(5)~ ~led(4)~ ~led(3)~ ~led(2)~ ~led(1)~ ~led(0)~
+</div>
+
+
+</div>
+
+<script type="text/javascript">
+
+document.getElementById('hello').innerHTML = "~hellomsg~";
+
+</script>
+<!--#include file="footer.htm" -->

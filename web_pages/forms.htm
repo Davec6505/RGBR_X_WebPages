@@ -1,0 +1,158 @@
+<!--#include file="header.htm" -->
+<div id="content">
+
+<h1>Control LED_O</h1>
+
+<p>Basic control commands to the LED_O display can be sent using this form.</p>
+<p>Send shape (XStart, YStart, XEnd, YEnd) for <b>size in x and y direction, left to right, top to bottom</b> prior to sending shape data:</p>
+<form method="get" action="forms.htm">
+    <div class="examplebox" style="display: flex; flex-direction: column; align-items: flex-start;">
+        <label for="xStart"><b>X Start:</b></label>
+        <input type="number" id="xStart" name="xStart" placeholder="X Start" required />
+        
+        <label for="yStart"><b>Y Start:</b></label>
+        <input type="number" id="yStart" name="yStart" placeholder="Y Start" required />
+        
+        <label for="xEnd"><b>X End:</b></label>
+        <input type="number" id="xEnd" name="xEnd" placeholder="X End" required />
+    
+        <label for="yEnd"><b>Y End: </b></label>
+        <input type="number" id="yEnd" name="yEnd" placeholder="Y End" required />
+        
+        <input type="hidden" name="formid" value="start_positions" />
+        <input type="submit" value="Send" style="margin-top:5px;">
+    </div>
+</form>
+<br />
+<p>Send shape, quantity, weight, and color (all as numbers):</p>
+<!-- Shape, quantity, weight, and color form -->
+<form method="get" action="forms.htm">
+    <div class="examplebox" style="display: flex; flex-direction: column; align-items: flex-start;">
+        <label for="shape"><b>Shape:</b></label>
+        <input type="number" id="shape" name="shape" placeholder="Shape" required style="margin-bottom: 8px;" />
+
+        <label for="quantity"><b>Quantity:</b></label>
+        <input type="number" id="quantity" name="quantity" placeholder="Quantity" required style="margin-bottom: 8px;" />
+
+        <label for="weight"><b>Weight:</b></label>
+        <input type="number" id="weight" name="weight" placeholder="Weight" required style="margin-bottom: 8px;" />
+
+        <label for="color"><b>Color:</b></label>
+        <input type="number" id="color" name="color" placeholder="Color" required style="margin-bottom: 8px;" />
+        
+        <input type="hidden" name="formid" value="shape_data" />
+        <input type="submit" value="Send" style="margin-top:5px;">
+    </div>
+</form>
+<br />
+<p>Send bitmap number and quantity (the screen uses the bitmap x <b>pixel quantity</b> to space horizontally):</p>
+<!-- Bitmap number and quantity form -->
+<form method="get" action="forms.htm">
+    <div class="examplebox">
+        <label for="bitmapNum"><b>Bitmap Number:</b></label>
+        <input type="number" id="bitmapNum" name="bitmapNum" min="0" max="20" placeholder="Bitmap number" value="0"/>
+        &nbsp;
+        <label for="bitmapQty"><b>Quantity:</b></label>
+        <input type="number" id="bitmapQty" name="bitmapQty" min="1" max="4" value="1" />
+        <input type="hidden" name="formid" value="bitmap_data" />
+        <input type="submit" value="Send" style="margin-top:5px;">
+    </div>
+</form>
+<br />
+<p>Set screen border weight and color (adds a band around the top and bottom of the screen <i>weight = pixel depth</i>):</p>
+<!-- Border weight and color form -->
+<form method="get" action="forms.htm">
+    <div class="examplebox">
+        <label for="borderWeight"><b>Border weight:</b></label>
+        <input type="number" id="borderWeight" name="borderWeight" min="0" max="20" placeholder="Border weight" />
+        &nbsp;
+        <label for="borderColor"><b>Border color:</b></label>
+        <input type="number" id="borderColor" name="borderColor" min="0" max="63488" placeholder="Border color" value="63488" />
+        <input type="hidden" name="formid" value="border" />
+        <input type="submit" value="Send" style="margin-top:5px;">
+    </div>
+</form>
+<br />
+<p>Send text properties with X Position, Y Position, and Text Color (set these vaules prior to sending text):</p>
+<!-- Text properties form -->
+<form method="get" action="forms.htm">
+    <div class="examplebox" style="display: flex; flex-direction: column; align-items: flex-start;">
+        <label for="xPos"><b>X Position:</b></label>
+        <input type="number" id="xPos" name="xPos" placeholder="X Position" required style="margin-bottom: 8px;" />
+
+        <label for="yPos"><b>Y Position:</b></label>
+        <input type="number" id="yPos" name="yPos" placeholder="Y Position" required style="margin-bottom: 8px;" />
+
+        <label for="textColor"><b>Text Color:</b></label>
+        <input type="number" id="textColor" name="textColor" placeholder="Text Color" required style="margin-bottom: 8px;" />
+
+        <input type="hidden" name="formid" value="text_properties" />
+        <input type="submit" value="Send" style="margin-top:5px;">
+    </div>
+</form>
+<br />
+<p>Send a custom message to the LED_O displayEnter the text to display <i>(30 char max)</i>:</p>
+<!-- Custom message form -->
+<form method="get" action="forms.htm">
+    <div class="examplebox">
+        <label for="mtext"><b>Send Data:</b></label>
+        <input type="text" id="mtext" name="mtext" size="30" placeholder="Enter your data here" />
+
+        <input type="hidden" name="formid" value="custom_message" />
+        <input type="submit" value="Send" style="margin-top:5px;">
+    </div>
+</form>
+<br />
+
+<p>Rotate direction and speed (speed of 0 = no rotation, speed depends on bitmap, shape or text):</p>
+<!-- Rotate direction and speed form -->
+<form method="get" action="forms.htm">
+    <div class="examplebox">
+        <label for="rotateDir"><b>Rotate Direction (0 or 1):</b></label>
+        <input type="number" id="rotateDir" name="rotateDir" min="0" max="1" placeholder="0=Left, 1=Right" />
+        &nbsp;
+        <label for="rotateSpeed"><b>Rotate Speed:</b></label>
+        <input type="number" id="rotateSpeed" name="rotateSpeed" min="0" placeholder="Speed" />
+
+        <input type="hidden" name="formid" value="rotate" />
+        <input type="submit" value="Send" style="margin-top:5px;">
+    </div>
+</form>
+<br />
+<!-- Fill screen form -->
+<p>Fill screen (0=No Fill, 1=Fill):</p>
+<form method="get" action="forms.htm">
+    <div class="examplebox">
+        <label for="fill"><b>Fill Screen (0 or 1):</b></label>
+        <input type="number" id="fill" name="fill" min="0" max="1" placeholder="0=No Fill, 1=Fill" />
+        &nbsp;
+        <label for="fillColor"><b>Fill Color:</b></label>
+        <input type="number" id="fillColor" name="fillColor" min="0" max="63488" placeholder="Fill color" value="63488" />
+
+        <input type="hidden" name="formid" value="fill_screen" />
+        <input type="submit" value="Send" style="margin-top:5px;">
+    </div>
+</form>
+<br />
+
+</div>
+<script type="text/javascript">
+
+    
+<!--
+document.getElementById('hello').innerHTML = "~hellomsg~";
+-->
+</script>
+<script>
+window.onload = function() {
+    // Parse query string
+    const params = new URLSearchParams(window.location.search);
+    // For each input, set its value if present in the query string, but skip hidden fields
+    document.querySelectorAll('input[name]').forEach(function(input) {
+        if (input.type !== "hidden" && params.has(input.name)) {
+            input.value = params.get(input.name);
+        }
+    });
+};
+</script>
+<!--#include file="footer.htm" -->
