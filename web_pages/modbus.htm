@@ -7,21 +7,22 @@
 <ul>
 	<li><b>01</b> - Set control bits 0-8.</li>
 	<li><b>03</b> - Read multiple input registers used by display 0 - 99.</li>
-	<li><b>04 / 06</b> -  Write/Read single display register 0 - 99.</li>
+	<li><b>06</b> - Write/Read single register 0 - 99.</li>
 	<li><b>10</b> - Write multiple registers to display 0 - 99.</li>
 </ul>
 
 <h2>Control register mappings</h2>
-0 - 99 zero indexed registers are used to control LED_O.<p>
-		<p><i>40000 - 40099 registers are not supported by this device.</i><br />
+<p>0 - 99 zero indexed registers are used to control LED_O.
+		<i>40000 - 40099 registers are not supported by this device.</i></p>
+<br />
 <ul>
 <li><b>0 - 3 </b>: [XStart, YStart, XEnd, YEnd].</li>
 <li><b>4 - 7 </b>: [Shape, Quantity, Weight, Color].
 <ul class="sub-list">
 	<li><i>Shape</i>   - [Rectangle, Circle, Triangle].</li>
-	<li><i>Quantity</i>- Shapes quantity cannot exceed the total pixel width (128) / Shape width (shape width uses [XStart - XEnd] = width).
-	<li><i>Weight</i>  - Weight of the shape is the thickness of the edges in pixels.
-	<li><i>Color</i>   - Color has a 15bit range with a 25&#37 loss in the lighter areas of RGB, R=63488,G=28180,B=31. Lower levels of color density are limited.
+	<li><i>Quantity</i>- Shapes quantity cannot exceed the total pixel width (128) / Shape width (shape width uses [XStart - XEnd] = width).</li>
+	<li><i>Weight</i>  - Weight of the shape is the thickness of the edges in pixels.</li>
+	<li><i>Color</i>   - Color has a 16bit range, R=&lt63488-2048&gt,G=&lt2016-32&gt,B=&lt31-1&gt. Lower levels of color density are limited.</li>
 </ul></li>
 <li><b>8 - 9 </b>: [Bitmap, Quantity]
 <ul class="sub-list">
@@ -31,11 +32,12 @@
 <li><b>10 - 11</b>: [Border Weight, Color]
 <ul class="sub-list">
 	<li><i>Border weight</i>- Places a band of n pixels in depth on the top and bottom of the display, can be used to highlight text.</li>
+	<li><i>Border color</i> - Color of the border, uses 16bit format [R=5bits,G=6bits,B=5bits], R=&lt63488-2048&gt,G=&lt2016-32&gt,B=&lt31-1&gt.</li>
 </ul></li>
 <li><b>12 - 15</b>: [Text XPos, Text YPos, Text Color, Font type]
 <ul class="sub-list">
 	<li>Text x and y postioins in pixels, Y position will can be used to centralize the text.</li>
-	<li>Shape color above applies to text color.
+	<li>Font color uses 16bit format [R=5bits,G=6bits,B=5bits], R=&lt63488-2048&gt,G=&lt2016-32&gt,B=&lt31-1&gt.</li>
 </ul></li>
 <li><b>16 - 17</b>: [SI Unit, Decimal place].
 <ul class="sub-list">
@@ -46,7 +48,7 @@
 <ul class="sub-list">
 	<li><i>Lo-Limit / Hi-Limit</i>- Scale the Bar graph displayed for analog values, [...].
 	<li><i>Alarm Limits</i>       - Set the limits from the analog value to change color of the bar graph.
-	<li><i>Alarm Colors</i>       - Shape colors apply.
+	<li><i>Alarm Colors</i>       - Shape colors apply for alarm indications.
 </ul></li>
 <li><b>24 - 25</b>: [Rotation direction, Rotation speed].
 <ul class="sub-list">
@@ -56,7 +58,7 @@
 <li><b>26 - 27</b>: [Fill Screen, Fill color].
 <ul class="sub-list">
 	<li><i>Fill</i>				  - Fill the screen with one color.</li>
-	<li><i>Color<i>				  - Indipendant color to fill the screen, this differs from text and shape colors.</li>
+	<li><i>Color</li>i>		      - Indipendant color to fill the screen. uses 16bit format [R=5bits,G=6bits,B=5bits], R=&lt63488-2048&gt,G=&lt2016-32&gt,B=&lt31-1&gt.</li>
 </ul></li>
 <li><b>30 - 59</b>: [Text].
 	<ul class="sub-list">

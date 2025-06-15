@@ -1,34 +1,56 @@
 <!--#include file="header.htm" -->
+<style type="text/css">
+    .examplebox label {
+    display: inline-block;
+    width: 140px;
+    text-align: right;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+</style>
 <div id="content">
 
 <h1>Upload Bitmaps</h1>
 
-<p> Upload bitmaps to the microSD card, file name must not exceed 60 characters.
-<br>Bitmaps are stored in the root directory of the microSD card.
-<br>Only one bitmap can be uploaded at a time.
-<br>Bitmaps must be in 16 bit color format, 32x32 or 32x64 pixels.
-<br>There is a 20 Bitmap limit, the first 20 bitmaps are used.
+<p> In order to upload bitmaps to the microSD card the file name must not exceed 60 characters.
+<ol>
+    <li>Existing bitmaps will not be overwritten.</li>
+    <li>Inorder to replace a bitmap it must first be deleted.</li>
+    <li>Only one bitmap can be uploaded at a time.</li>
+    <li>Bitmaps must be in 24 bit color format with 32x32 or 32x64 pixels.</li>
+    <li>The first 30 bitmaps will be used.</li>
+</ol>
 </p>
 
 <form action="upload.htm" method="post" enctype="multipart/form-data">
-<!--div id="loading" style="display:none">Error:<br />Connection to demo board was lost.</div-->
-<div class="examplebox" id="display">>
-~uploadedmd5~
+
+<div class="examplebox" id="display">
 <p style="margin-bottom: 2px"><b>File: </b>&nbsp;
 <input type="file" name="md5file" size="30" accept=".bmp"/> &nbsp;
 <input type="submit" value="UPLOAD"/>
 </p>
-<p>Number of Bitmaps available: <span id="pot1" style="font-weight:normal">~bmp_num~</span></p>
 </div>
+</form>
 
+<form method="get" action="upload.htm">
+<div class="examplebox">
+        <label for="removeBitmapName"><b>Remove Bitmap:</b></label>
+        <input type="text" id="removeBitmapName" name="removeBmpName" placeholder="Enter bitmap name" required />
+        <input type="hidden" name="formid" value="remove_bitmap" />
+        <input type="submit" value="REMOVE" style="background-color:#c00;color:#fff;margin-left:8px;">
+</div>
+</form>
+
+<form action="upload.htm" method="post">
+    <p>Number of Bitmaps available: <span id="pot1" style="font-weight:normal">~bmp_num~</span></p>
 
 <div id="table">
     <p>Listed below are the offsets of the bitmaps for use with mb register 08.<br><br></p>
     <h3 style="font-weight: bold;">Offset&nbsp;&nbsp;Bitmap</h3>
     <ol id="parent" start="0">	
     </ol>
-    </div> 
-    </form>
+</div> 
+</form>
     <!--input type="submit"  value="List Bitmaps" 
            onclick="newAJAXCommand('get_bmp.xml',getName,false);" 
            style="margin-top:5px;"

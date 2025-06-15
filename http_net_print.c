@@ -61,7 +61,6 @@ static HTTP_APP_DYNVAR_ENTRY HTTP_APP_DynVarTbl[] =
 {"builddate",					TCPIP_HTTP_Print_builddate},
 {"led",					TCPIP_HTTP_Print_led},
 {"version",					TCPIP_HTTP_Print_version},
-{"uploadedmd5",					TCPIP_HTTP_Print_uploadedmd5},
 {"snmp_en",					TCPIP_HTTP_Print_snmp_en},
 {"read_comm",					TCPIP_HTTP_Print_read_comm},
 {"write_comm",					TCPIP_HTTP_Print_write_comm},

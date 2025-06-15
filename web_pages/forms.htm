@@ -8,17 +8,17 @@
 <form method="get" action="forms.htm">
     <div class="examplebox" style="display: flex; flex-direction: column; align-items: flex-start;">
         <label for="xStart"><b>X Start:</b></label>
-        <input type="number" id="xStart" name="xStart" placeholder="X Start" required />
-        
+        <input type="number" id="xStart" name="xStart" placeholder="X Start" value="0" required />
+
         <label for="yStart"><b>Y Start:</b></label>
-        <input type="number" id="yStart" name="yStart" placeholder="Y Start" required />
-        
+        <input type="number" id="yStart" name="yStart" placeholder="Y Start" value="10" required />
+
         <label for="xEnd"><b>X End:</b></label>
-        <input type="number" id="xEnd" name="xEnd" placeholder="X End" required />
-    
+        <input type="number" id="xEnd" name="xEnd" placeholder="X End" value="10" required />
+
         <label for="yEnd"><b>Y End: </b></label>
-        <input type="number" id="yEnd" name="yEnd" placeholder="Y End" required />
-        
+        <input type="number" id="yEnd" name="yEnd" placeholder="Y End" value="10" required />
+
         <input type="hidden" name="formid" value="start_positions" />
         <input type="submit" value="Send" style="margin-top:5px;">
     </div>
@@ -29,16 +29,16 @@
 <form method="get" action="forms.htm">
     <div class="examplebox" style="display: flex; flex-direction: column; align-items: flex-start;">
         <label for="shape"><b>Shape:</b></label>
-        <input type="number" id="shape" name="shape" placeholder="Shape" required style="margin-bottom: 8px;" />
+        <input type="number" id="shape" name="shape" placeholder="Shape" required style="margin-bottom: 8px;" min="0" max="0" value="0"/>
 
         <label for="quantity"><b>Quantity:</b></label>
-        <input type="number" id="quantity" name="quantity" placeholder="Quantity" required style="margin-bottom: 8px;" />
+        <input type="number" id="quantity" name="quantity" placeholder="Quantity" required style="margin-bottom: 8px;" min="1" value="1" required/>
 
         <label for="weight"><b>Weight:</b></label>
-        <input type="number" id="weight" name="weight" placeholder="Weight" required style="margin-bottom: 8px;" />
+        <input type="number" id="weight" name="weight" placeholder="Weight" required style="margin-bottom: 8px;" min="1" value="3" required/>
 
         <label for="color"><b>Color:</b></label>
-        <input type="number" id="color" name="color" placeholder="Color" required style="margin-bottom: 8px;" />
+        <input type="number" id="color" name="color" placeholder="Color" required style="margin-bottom: 8px;" value="31"/>
         
         <input type="hidden" name="formid" value="shape_data" />
         <input type="submit" value="Send" style="margin-top:5px;">
@@ -64,7 +64,7 @@
 <form method="get" action="forms.htm">
     <div class="examplebox">
         <label for="borderWeight"><b>Border weight:</b></label>
-        <input type="number" id="borderWeight" name="borderWeight" min="0" max="20" placeholder="Border weight" />
+        <input type="number" id="borderWeight" name="borderWeight" min="0" max="20" placeholder="Border weight" value="4" />
         &nbsp;
         <label for="borderColor"><b>Border color:</b></label>
         <input type="number" id="borderColor" name="borderColor" min="0" max="63488" placeholder="Border color" value="63488" />
@@ -78,15 +78,31 @@
 <form method="get" action="forms.htm">
     <div class="examplebox" style="display: flex; flex-direction: column; align-items: flex-start;">
         <label for="xPos"><b>X Position:</b></label>
-        <input type="number" id="xPos" name="xPos" placeholder="X Position" required style="margin-bottom: 8px;" />
+        <input type="number" id="xPos" name="xPos" placeholder="X Position" required style="margin-bottom: 8px;" value="0"/>
 
         <label for="yPos"><b>Y Position:</b></label>
-        <input type="number" id="yPos" name="yPos" placeholder="Y Position" required style="margin-bottom: 8px;" />
+        <input type="number" id="yPos" name="yPos" placeholder="Y Position" required style="margin-bottom: 8px;" value="10"/>
 
         <label for="textColor"><b>Text Color:</b></label>
-        <input type="number" id="textColor" name="textColor" placeholder="Text Color" required style="margin-bottom: 8px;" />
+        <input type="number" id="textColor" name="textColor" placeholder="Text Color" required style="margin-bottom: 8px;" value="2016"/>
 
         <input type="hidden" name="formid" value="text_properties" />
+        <input type="submit" value="Send" style="margin-top:5px;">
+    </div>
+</form>
+<br />
+<p>Change font.</p>
+<!-- Font selection form -->
+ <form method="get" action="forms.htm">
+    <div class="examplebox">
+        <label for="font"><b>Font:</b></label>
+        <select id="font" name="font" style="width: 160px;">
+            <option value="Arial8x11">Arial 8x11</option>
+            <option value="Rockwell8x9">Rockwell 8x9</option>
+            <option value="ArialIt11x11">Arial Italic 11x11</option>
+            <option value="Segoe_UI_Semibold13x14">Segoe UI Semibold 13x14</option>
+        </select>
+        <input type="hidden" name="formid" value="send_font" />
         <input type="submit" value="Send" style="margin-top:5px;">
     </div>
 </form>
@@ -147,10 +163,25 @@ document.getElementById('hello').innerHTML = "~hellomsg~";
 window.onload = function() {
     // Parse query string
     const params = new URLSearchParams(window.location.search);
-    // For each input, set its value if present in the query string, but skip hidden fields
+
+    // Restore values for all input fields except hidden and submit
     document.querySelectorAll('input[name]').forEach(function(input) {
-        if (input.type !== "hidden" && params.has(input.name)) {
+        if (input.type !== "hidden" && input.type !== "submit" && params.has(input.name)) {
             input.value = params.get(input.name);
+        }
+    });
+
+    // Restore values for select elements
+    document.querySelectorAll('select[name]').forEach(function(select) {
+        if (params.has(select.name)) {
+            select.value = params.get(select.name);
+        }
+    });
+
+    // Restore values for textarea elements
+    document.querySelectorAll('textarea[name]').forEach(function(textarea) {
+        if (params.has(textarea.name)) {
+            textarea.value = params.get(textarea.name);
         }
     });
 };

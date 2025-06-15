@@ -42,11 +42,20 @@ Microchip or any third party.
 #include "tcpip/tcpip.h"
 #include "tcpip/src/common/helpers.h"
 
+#include "../../ModbusTCP_X/ModbusTCP_X.X/ModbusTCP.h"
+#include "config/default/RGB/rgb_control.h"
+#include "config/default/system/reset/sys_reset.h"
+
+extern APP_DATA appData;
+
+
+
 /****************************************************************************
   Section:
     Definitions
  ****************************************************************************/
-
+#define LED_O_VERSION_STR           "1.00 - R2"
+/*
 #ifndef APP_SWITCH_1StateGet
 #define APP_SWITCH_1StateGet() 0
 #endif
@@ -98,6 +107,41 @@ Microchip or any third party.
 #ifndef APP_LED_3StateToggle
 #define APP_LED_3StateToggle()
 #endif
+*/
+
+void start_positions(uint8_t *httpData);
+void shape_data(uint8_t *httpData);
+void bitmap_data(uint8_t *httpData);
+void border(uint8_t *httpData);
+void text_properties(uint8_t *httpData);
+void custom_message(uint8_t *httpData);
+void rotate(uint8_t *httpData);
+void fill_screen(uint8_t *httpData);
+void control_screen(uint8_t fc,uint16_t add, uint16_t quantity,uint16_t a,uint16_t b,uint16_t c,uint16_t d,const uint8_t *str);
+void close_connection(uint8_t *httpData);
+
+typedef void (*HTTP_APP_SCREEN_FNC)(uint8_t *arg);
+
+typedef struct HTTP_APP_SCREEN_GET
+{
+    const char *varName;        // name of the dynamic variable
+    HTTP_APP_SCREEN_FNC varFnc; // processing function
+}HTTP_APP_SCREEN_GET;
+
+// table with the processed dynamic variables in this demo
+static HTTP_APP_SCREEN_GET HTTP_APP_ScreenFncTbl[] = 
+{
+ // varName                     varFnc
+{"start_positions",				start_positions},
+{"shape_data",                  shape_data},
+{"bitmap_data",                 bitmap_data},
+{"border",                      border},
+{"text_properties",             text_properties},
+{"custom_message",              custom_message},
+{"rotate",                      rotate},
+{"fill_screen",                 fill_screen},
+{"close_connection",            close_connection},
+};
 
 // Use the web page in the Demo App (~2.5kb ROM, ~0b RAM)
 #define HTTP_APP_USE_RECONFIG
@@ -144,6 +188,9 @@ extern const char *const ddnsServiceHosts[];
 #if defined(TCPIP_STACK_USE_DYNAMICDNS_CLIENT)
     static uint8_t DDNSData[100];
 #endif
+//Set XY values for screen
+static TCPIP_HTTP_NET_IO_RESULT HTTPPostXY(TCPIP_HTTP_NET_CONN_HANDLE connHandle);
+
 
 // Sticky status message variable.
 // This is used to indicated whether or not the previous POST operation was
@@ -228,8 +275,316 @@ bool TCPIP_HTTP_NET_SSINotification(TCPIP_HTTP_NET_CONN_HANDLE connHandle, TCPIP
 
 /****************************************************************************
   Section:
-    GET Form Handlers
+    GET Form Handlers to control the screen
  ****************************************************************************/
+
+void start_positions(uint8_t *httpData)
+{
+   const uint8_t *ptr;
+   uint16_t val[4] = {0};
+   uint8_t test = 0;
+   
+        ptr = TCPIP_HTTP_NET_ArgGet(httpData, (const uint8_t *)"xStart");
+        if(ptr)
+        {
+            test++;
+            val[0] = atoi((const char*)ptr);
+            SYS_CONSOLE_PRINT("xStart: %s",ptr);
+        }
+
+        ptr = TCPIP_HTTP_NET_ArgGet(httpData, (const uint8_t *)"yStart");
+        if(ptr)
+		{
+            test++;
+            val[1] = atoi((const char*)ptr);
+            SYS_CONSOLE_PRINT("\tyStart: %s",ptr);
+        }
+        
+        ptr = TCPIP_HTTP_NET_ArgGet(httpData, (const uint8_t *)"xEnd");
+        if(ptr)
+        {
+            test++;
+            val[2] = atoi((const char*)ptr);
+            SYS_CONSOLE_PRINT("\txEnd: %s",ptr);
+        }
+
+        ptr = TCPIP_HTTP_NET_ArgGet(httpData, (const uint8_t *)"yEnd");
+        if(ptr)
+		{
+            test++;
+            val[3] = atoi((const char*)ptr);
+            SYS_CONSOLE_PRINT("\tyEnd: %s\r\n",ptr);
+        }
+        if(test == 4)
+           control_screen(16,0,4,val[0],val[1],val[2],val[3],NULL);
+}
+
+void shape_data(uint8_t *httpData)
+{
+   const uint8_t *ptr;
+   uint16_t val[4] = {0};
+   uint8_t test = 0;
+   
+        ptr = TCPIP_HTTP_NET_ArgGet(httpData, (const uint8_t *)"shape");
+        if(ptr)
+        {
+            test++;
+            val[0] = atoi((const char*)ptr);
+            SYS_CONSOLE_PRINT("shape: %s",ptr);
+        }
+
+        ptr = TCPIP_HTTP_NET_ArgGet(httpData, (const uint8_t *)"quantity");
+        if(ptr)
+		{
+            test++;
+            val[1] = atoi((const char*)ptr);
+            SYS_CONSOLE_PRINT("\tquantity: %s",ptr);
+        }
+        
+        ptr = TCPIP_HTTP_NET_ArgGet(httpData, (const uint8_t *)"weight");
+        if(ptr)
+        {
+            test++;
+            val[2] = atoi((const char*)ptr);
+            SYS_CONSOLE_PRINT("\tweight: %s",ptr);
+        }
+        
+        ptr = TCPIP_HTTP_NET_ArgGet(httpData, (const uint8_t *)"color");
+        if(ptr)
+        {
+            test++;
+            val[3] = atoi((const char*)ptr);
+            SYS_CONSOLE_PRINT("\tcolor: %s\r\n",ptr);
+        }
+        if(test == 4)
+           control_screen(16,4,4,val[0],val[1],val[2],val[3],NULL);
+}
+
+void bitmap_data(uint8_t *httpData)
+{
+    const uint8_t *ptr;
+    uint16_t val[4] = {0};
+    uint8_t test = 0;
+ 
+        ptr = TCPIP_HTTP_NET_ArgGet(httpData, (const uint8_t *)"bitmapNum");
+        if(ptr)
+        {
+            test++;
+            val[0] = atoi((const char*)ptr);
+            SYS_CONSOLE_PRINT("bitmapNum: %s",ptr);
+        }
+
+        ptr = TCPIP_HTTP_NET_ArgGet(httpData, (const uint8_t *)"bitmapQty");
+        if(ptr)
+		{
+            test++;
+            val[1] = atoi((const char*)ptr);           
+            SYS_CONSOLE_PRINT("\tbitmapQty: %s\r\n",ptr);
+        }
+        if(test == 2)
+           control_screen(16,8,2,val[0],val[1],val[2],val[3],NULL);           
+}
+
+void border(uint8_t *httpData)
+{
+    const uint8_t *ptr;
+    uint16_t val[4] = {0};
+    uint8_t test = 0;
+ 
+        ptr = TCPIP_HTTP_NET_ArgGet(httpData, (const uint8_t *)"borderWeight");
+        if(ptr)
+        {
+            test++;
+            val[0] = atoi((const char*)ptr);
+            SYS_CONSOLE_PRINT("borderWeight: %s",ptr);
+        }
+
+        ptr = TCPIP_HTTP_NET_ArgGet(httpData, (const uint8_t *)"borderColor");
+        if(ptr)
+		{
+            test++;
+            val[1] = atoi((const char*)ptr);
+            SYS_CONSOLE_PRINT("\tborderColor: %s\r\n",ptr);          
+        } 
+        if(test == 2)
+           control_screen(16,10,2,val[0],val[1],val[2],val[3],NULL); 
+}
+
+void text_properties(uint8_t *httpData)
+{
+   const uint8_t *ptr;
+   uint16_t val[4] = {0};
+   uint8_t test = 0;
+   
+        ptr = TCPIP_HTTP_NET_ArgGet(httpData, (const uint8_t *)"xPos");
+        if(ptr)
+        {
+            test++;
+            val[0] = atoi((const char*)ptr);
+            SYS_CONSOLE_PRINT("xPos: %s",ptr);          
+        }
+
+        ptr = TCPIP_HTTP_NET_ArgGet(httpData, (const uint8_t *)"yPos");
+        if(ptr)
+		{
+            test++;
+            val[1] = atoi((const char*)ptr);
+            SYS_CONSOLE_PRINT("\tyPos: %s",ptr);
+        }
+        
+        ptr = TCPIP_HTTP_NET_ArgGet(httpData, (const uint8_t *)"textColor");
+        if(ptr)
+        {
+            test++;
+            val[2] = atoi((const char*)ptr);
+            SYS_CONSOLE_PRINT("\ttextColor: %s\r\n",ptr);
+        }
+        if(test == 3)
+           control_screen(16,12,3,val[0],val[1],val[2],val[3],NULL); 
+}
+
+void custom_message(uint8_t *httpData)
+{
+    const uint8_t *ptr;
+    uint16_t len;
+    
+        ptr = TCPIP_HTTP_NET_ArgGet(httpData, (const uint8_t *)"mtext");
+        if(ptr)
+        {
+            len = strlen(ptr);
+            SYS_CONSOLE_PRINT("text: %s\t%d\r\n",ptr,len);
+            control_screen(16,30,len,0,0,0,0,ptr);
+        }   
+}
+
+void rotate(uint8_t *httpData)
+{
+     const uint8_t *ptr;
+     int16_t val[4] = {0};
+     uint8_t test = 0;
+     
+        ptr = TCPIP_HTTP_NET_ArgGet(httpData, (const uint8_t *)"rotateDir");
+        if(ptr)
+        {
+            test++;
+            val[0] = atoi((const char*)ptr);
+            SYS_CONSOLE_PRINT("rotateDir: %s",ptr);
+        }
+
+        ptr = TCPIP_HTTP_NET_ArgGet(httpData, (const uint8_t *)"rotateSpeed");
+        if(ptr)
+		{
+            test++;
+            val[1] = atoi((const char*)ptr);
+            SYS_CONSOLE_PRINT("\trotateSpeed: %s\r\n",ptr);
+        }  
+        if(test == 2)
+           control_screen(16,24,2,val[0],val[1],val[2],val[3],NULL);
+}
+
+void fill_screen(uint8_t *httpData)
+{
+      const uint8_t *ptr;
+      int16_t val[4] = {0};
+      uint8_t test = 0;
+      
+        ptr = TCPIP_HTTP_NET_ArgGet(httpData, (const uint8_t *)"fill");
+        if(ptr)
+        {   
+            test++;
+            val[0] = atoi((const char*)ptr);
+            //set_Var(27,val[0]);
+            SYS_CONSOLE_PRINT("fill: %s\t%d",ptr,val[0]);
+        }
+
+        ptr = TCPIP_HTTP_NET_ArgGet(httpData, (const uint8_t *)"fillColor");
+        if(ptr)
+		{  
+            test++;
+            val[1] = atoi((const char*)ptr);
+            //set_Var(28,val[1]);
+            SYS_CONSOLE_PRINT("\tfillColor: %s\t%d\r\n",ptr,val[1]);
+        }  
+        if(test == 2)
+           control_screen(16,26,2,val[0],val[1],val[2],val[3],NULL);
+       
+}
+
+void control_screen(uint8_t fc,uint16_t add, uint16_t quantity,uint16_t a,uint16_t b,uint16_t c,uint16_t d,const uint8_t *str)
+{
+ static screen_disp_values _Str;
+ static uint8_t Buff[255 + 1] = {0}; 
+ uint16_t bytes,sz,i;  
+    if(add == TEXT){ 
+        
+        i = 0;
+        do{
+            Buff[i+13] = *(str);
+            SYS_CONSOLE_PRINT("%c",Buff[i+13]);
+            i++;
+        }while(*(str++) != '\0');
+        Buff[i] = '\0';
+        bytes = i;
+        quantity = i >> 1;
+        quantity += ((quantity % 2)==0)? 0:1;
+        bytes = quantity << 1;
+        sz = bytes + 6 + 7;
+        SYS_CONSOLE_PRINT("\r\nsend: %d\r\n",sz);
+
+    }
+    else{
+        bytes = (quantity << 1) + 7;
+        sz = bytes + 6;       
+    }
+      
+      Buff[0] = Buff[1] = Buff[2] = Buff[3] = 0;
+      //length in bytes from unit id
+      Buff[4] = Hi(bytes);
+      Buff[5] = Lo(bytes);
+      //unit id        
+      Buff[6] = 0xff;
+      Buff[7] = fc;
+      Buff[8] = Hi(add);
+      Buff[9] = Lo(add);
+      Buff[10] = Hi(quantity);
+      Buff[11] = Lo(quantity);
+      Buff[12] = quantity << 1;
+      
+      //if string has been sent then skip
+      if(add != TEXT){
+        Buff[13] = Hi(a);
+        Buff[14] = Lo(a);
+        Buff[15] = Hi(b);
+        Buff[16] = Lo(b);
+        Buff[17] = Hi(c);
+        Buff[18] = Lo(c);
+        Buff[19] = Hi(d);
+        Buff[20] = Lo(d);
+    
+      }
+      sz = modbus_DataConditioning(Buff,sz);
+      SYS_CONSOLE_PRINT("FC:= %d add:= %d\terr: %d\r\n ",Buff[7],Buff[9],sz);
+     
+      //modbus_set_hasdata(1); 
+      set_FC(Buff);
+      modbus_connect_set(1);
+      if(modbus_hasdata()){
+            #define WEB_DEBUG       
+            #ifdef WEB_DEBUG
+            SYS_CONSOLE_PRINT("web sent data... %d\r\n",sz);
+            #endif    
+
+            modbus_reset_sent();
+            run_modbus_data(&_Str);
+
+      }
+  
+}
+
+void close_connection(uint8_t *httpData)
+{
+    web_control_set(0);
+}
 
 /*****************************************************************************
   Function:
@@ -240,6 +595,8 @@ bool TCPIP_HTTP_NET_SSINotification(TCPIP_HTTP_NET_CONN_HANDLE connHandle, TCPIP
  ****************************************************************************/
 TCPIP_HTTP_NET_IO_RESULT TCPIP_HTTP_NET_ConnectionGetExecute(TCPIP_HTTP_NET_CONN_HANDLE connHandle, const TCPIP_HTTP_NET_USER_CALLBACK *pCBack)
 {
+    int ix;
+    HTTP_APP_SCREEN_GET *sEntry;
     const uint8_t *ptr;
     uint8_t *httpDataBuff;
     uint8_t filename[20];
@@ -254,32 +611,31 @@ TCPIP_HTTP_NET_IO_RESULT TCPIP_HTTP_NET_ConnectionGetExecute(TCPIP_HTTP_NET_CONN
     // If its the forms.htm page
     if(!memcmp(filename, "forms.htm", 9))
     {
-        // Seek out each of the four LED strings, and if it exists set the LED states
-        ptr = TCPIP_HTTP_NET_ArgGet(httpDataBuff, (const uint8_t *)"led2");
-        if(ptr)
-        {
-            if(*ptr == '1')
+        //check for a Modbus device connection
+       if(appData.state != APP_TCPIP_SERVING_CONNECTION) 
+       {
+            // Seek out each of the type of data
+           ptr = TCPIP_HTTP_NET_ArgGet(/*TCPIP_HTTP_NET_ConnectionDataBufferGet(connHandle)*/httpDataBuff, 
+                                       (const uint8_t*)"formid");
+            if(ptr == 0)
             {
-                APP_LED_2StateSet();
+                ptr = "not set";
             }
-            else
-            {
-                APP_LED_2StateClear();
-            }
-        }
 
-        ptr = TCPIP_HTTP_NET_ArgGet(httpDataBuff, (const uint8_t *)"led1");
-        if(ptr)
-		{
-            if(*ptr == '1')
+            SYS_CONSOLE_PRINT("%s\r\n",ptr);
+            sEntry = HTTP_APP_ScreenFncTbl;
+            for(ix = 0; ix < sizeof(HTTP_APP_ScreenFncTbl)/sizeof(*HTTP_APP_ScreenFncTbl); ++ix, ++sEntry)
             {
-                APP_LED_1StateSet();
+                if(strcmp(ptr, sEntry->varName) == 0)
+                {   
+                    // found it
+                    web_control_set(1);
+                    (*sEntry->varFnc)(httpDataBuff);
+                }
             }
-            else
-            {
-                APP_LED_1StateClear();
-            }
-        }
+
+       }
+        //
     }
 
     else if(!memcmp(filename, "cookies.htm", 11))
@@ -307,15 +663,19 @@ TCPIP_HTTP_NET_IO_RESULT TCPIP_HTTP_NET_ConnectionGetExecute(TCPIP_HTTP_NET_CONN
                     APP_LED_1StateToggle();
                     break;
                 case '1':
-                    APP_LED_2StateToggle();
+   //                 APP_LED_2StateToggle();
                     break;
                 case '2':
-                    APP_LED_3StateToggle();
+   //                 APP_LED_3StateToggle();
                     break;
             }
         }
     }
-
+    else if(!memcmp(filename,"upload.htm",10))
+    {
+        ptr = TCPIP_HTTP_NET_ArgGet(httpDataBuff, (const uint8_t *)"led");
+    }
+    
     return TCPIP_HTTP_NET_IO_RES_DONE;
 }
 
@@ -370,7 +730,9 @@ TCPIP_HTTP_NET_IO_RESULT TCPIP_HTTP_NET_ConnectionPostExecute(TCPIP_HTTP_NET_CON
     if(!strcmp((char *)filename, "dyndns/index.htm"))
         return HTTPPostDDNSConfig(connHandle);
 #endif
-
+    if(!memcmp(filename, "forms.htm", 9))
+        return HTTPPostXY(connHandle);
+    
     return TCPIP_HTTP_NET_IO_RES_DONE;
 }
 
@@ -511,6 +873,7 @@ static TCPIP_HTTP_NET_IO_RESULT HTTPPostMD5(TCPIP_HTTP_NET_CONN_HANDLE connHandl
     char data_type[200];
     char *ptr,*ptr_;
     char _ptr[62] = "";
+    char *suffix;
     static char path[80] = "/mnt/mchpSite2/"; //path must not exceed 80 - 20 = 60 chars
     uint32_t lenA, lenB, lenC = 0;
     SYS_FS_HANDLE _handle;
@@ -564,9 +927,25 @@ static TCPIP_HTTP_NET_IO_RESULT HTTPPostMD5(TCPIP_HTTP_NET_CONN_HANDLE connHandl
                 {
                     ptr_ = strtok(ptr,"\r\n");
                     ptr_[strlen(ptr_)-1] = '\0';
-                    SYS_CONSOLE_PRINT(": %s\r\n: %s\r\n",ptr,ptr_+10);
+                    
                     if((ptr_ != NULL) && (strlen(ptr_+10) < 60))
                     {
+                        suffix = strrchr(ptr_,'.');
+                        if(suffix == NULL)
+                        {
+                            // Return the need more data flag
+                            return TCPIP_HTTP_NET_IO_RES_DONE;
+                        }
+                        else
+                        {
+                          SYS_CONSOLE_PRINT(": %s\r\n: %s\r\n: %s\r\n",ptr,ptr_+10,suffix);
+                          if(strcmp(suffix, ".bmp") != 0)
+                          {
+                              SYS_CONSOLE_PRINT("Upload  .bmp files not %s!\r\n",suffix);
+                             // Return the need more data flag
+                              return TCPIP_HTTP_NET_IO_RES_DONE;                         
+                          }
+                        }
                         strcat(_ptr,ptr_+10);
                         strcat(path,ptr_+10);
                         SYS_CONSOLE_PRINT("path:= %s\r\n",path);
@@ -631,6 +1010,113 @@ static TCPIP_HTTP_NET_IO_RESULT HTTPPostMD5(TCPIP_HTTP_NET_CONN_HANDLE connHandl
     return TCPIP_HTTP_NET_IO_RES_DONE;
 }
 #endif // #if defined(HTTP_APP_USE_MD5)
+
+/*****************************************************************************
+  Function:
+    static TCPIP_HTTP_NET_IO_RESULT HTTPPostXYStartXYEnd(TCPIP_HTTP_NET_CONN_HANDLE connHandle)
+
+  Summary:
+    Processes XStart YStart XEnd YEnd form on form.htm
+
+  Description:
+    This function demonstrates the processing of file uploads.  First, the
+    function locates the file data, skipping over any headers that arrive.
+    Second, it reads the file 64 bytes at a time and hashes that data.  Once
+    all data has been received, the function calculates the MD5 sum and
+    stores it in current connection data buffer.
+
+    After the headers, the first line from the form will be the MIME
+    separator.  Following that is more headers about the file, which we
+    discard.  After another CRLFCRLF, the file data begins, and we read
+    it 16 bytes at a time and add that to the MD5 calculation.  The reading
+    terminates when the separator string is encountered again on its own
+    line.  Notice that the actual file data is trashed in this process,
+    allowing us to accept files of arbitrary size, not limited by RAM.
+    Also notice that the data buffer is used as an arbitrary storage array
+    for the result.  The ~uploadedmd5~ callback reads this data later to
+    send back to the client.
+
+  Precondition:
+    None
+
+  Parameters:
+    connHandle  - HTTP connection handle
+
+  Return Values:
+    TCPIP_HTTP_NET_IO_RES_DONE - all parameters have been processed
+    TCPIP_HTTP_NET_IO_RES_WAITING - the function is pausing to continue later
+    TCPIP_HTTP_NET_IO_RES_NEED_DATA - data needed by this function has not yet arrived
+ ****************************************************************************/
+static TCPIP_HTTP_NET_IO_RESULT HTTPPostXY(TCPIP_HTTP_NET_CONN_HANDLE connHandle)
+{
+    int16_t start,end;
+    static int16_t success;
+    uint8_t *cDest;
+    uint8_t *httpDataBuff;
+    uint16_t httpBuffSize;
+
+#define SM_POST_LCD_READ_NAME       (0u)
+#define SM_POST_LCD_READ_VALUE      (1u)
+
+    httpDataBuff = TCPIP_HTTP_NET_ConnectionDataBufferGet(connHandle);
+    httpBuffSize = TCPIP_HTTP_NET_ConnectionDataBufferSizeGet(connHandle);
+    switch(TCPIP_HTTP_NET_ConnectionPostSmGet(connHandle))
+    {
+        // Find the name
+        case SM_POST_LCD_READ_NAME:
+
+            // Read a name
+            if(TCPIP_HTTP_NET_ConnectionPostNameRead(connHandle, httpDataBuff, httpBuffSize) == TCPIP_HTTP_NET_READ_INCOMPLETE)
+                return TCPIP_HTTP_NET_IO_RES_NEED_DATA;
+
+            SYS_CONSOLE_PRINT("%s\t",(char*)httpDataBuff);
+            TCPIP_HTTP_NET_ConnectionPostSmSet(connHandle, SM_POST_LCD_READ_VALUE);
+            // No break...continue reading value
+            
+        // Found the value, so store the LCD and return
+        case SM_POST_LCD_READ_VALUE:
+            
+            // If value is expected, read it to data buffer,
+            // otherwise ignore it (by reading to NULL)
+            start = strcmp((char *)httpDataBuff+1, (const char *)"Start");
+            end = strcmp((char *)httpDataBuff+1, (const char *)"End");
+            if(!start || !end)
+            {
+                success++;
+            }
+           // SYS_CONSOLE_PRINT("%s\t%d\r\n",(char*)httpDataBuff,success);
+            
+            if(!start || !end)
+                cDest = httpDataBuff;
+            else if (start && end && (success < 3))
+                cDest = NULL;
+
+            // Read a value string
+            TCPIP_HTTP_NET_ConnectionPostValueRead(connHandle, cDest, httpBuffSize);// == TCPIP_HTTP_NET_READ_INCOMPLETE
+            
+            
+            if(!cDest)
+               return TCPIP_HTTP_NET_IO_RES_NEED_DATA;
+
+            SYS_CONSOLE_MESSAGE((char *)cDest);
+            SYS_CONSOLE_MESSAGE("\r\n");
+            // If this was an unexpected value, look for a new name
+            if(success < 4)
+            {
+                TCPIP_HTTP_NET_ConnectionPostSmSet(connHandle, SM_POST_LCD_READ_NAME);
+                break;
+            }
+
+            // This is the only expected value, so callback is done
+            strcpy((char *)httpDataBuff, "/forms.htm");
+            TCPIP_HTTP_NET_ConnectionStatusSet(connHandle, TCPIP_HTTP_NET_STAT_REDIRECT);
+            return TCPIP_HTTP_NET_IO_RES_DONE;
+    }
+
+    // Default assumes that we're returning for state machine convenience.
+    // Function will be called again later.
+    return TCPIP_HTTP_NET_IO_RES_WAITING;   
+}
 
 /*****************************************************************************
   Function:
@@ -1432,7 +1918,7 @@ TCPIP_HTTP_DYN_PRINT_RES TCPIP_HTTP_Print_builddate(TCPIP_HTTP_NET_CONN_HANDLE c
 
 TCPIP_HTTP_DYN_PRINT_RES TCPIP_HTTP_Print_version(TCPIP_HTTP_NET_CONN_HANDLE connHandle, const TCPIP_HTTP_DYN_VAR_DCPT *vDcpt)
 {
-    TCPIP_HTTP_NET_DynamicWriteString(vDcpt, (const char *)TCPIP_STACK_VERSION_STR, false);
+    TCPIP_HTTP_NET_DynamicWriteString(vDcpt, (const char *)LED_O_VERSION_STR, false);
     return TCPIP_HTTP_DYN_PRINT_RES_DONE;
 }
 
@@ -1486,13 +1972,13 @@ TCPIP_HTTP_DYN_PRINT_RES TCPIP_HTTP_Print_btn(TCPIP_HTTP_NET_CONN_HANDLE connHan
         switch(nBtn)
         {
             case 0:
-                nBtn = APP_SWITCH_1StateGet();
+   //             nBtn = APP_SWITCH_1StateGet();
                 break;
             case 1:
-                nBtn = APP_SWITCH_2StateGet();
+   //             nBtn = APP_SWITCH_2StateGet();
                 break;
             case 2:
-                nBtn = APP_SWITCH_3StateGet();
+   //             nBtn = APP_SWITCH_3StateGet();
                 break;
             default:
                 nBtn = 0;
@@ -1523,6 +2009,27 @@ TCPIP_HTTP_DYN_PRINT_RES TCPIP_HTTP_Print_led(TCPIP_HTTP_NET_CONN_HANDLE connHan
             case 2:
                 nLed = APP_LED_3StateGet();
                 break;
+                
+            case 3:
+                nLed = APP_LED_4StateGet();
+                break;
+
+            case 4:
+                nLed = APP_LED_5StateGet();
+                break;
+
+            case 5:
+                nLed = APP_LED_6StateGet();
+                break;
+
+            case 6:
+                nLed = APP_LED_7StateGet();
+                break;
+
+            case 7:
+                nLed = APP_LED_8StateGet();
+                break;
+
 
             default:
                 nLed = 0;
@@ -1728,7 +2235,7 @@ TCPIP_HTTP_DYN_PRINT_RES TCPIP_HTTP_Print_uploadedmd5(TCPIP_HTTP_NET_CONN_HANDLE
     if(TCPIP_HTTP_NET_ConnectionPostSmGet(connHandle) != SM_MD5_POST_COMPLETE)
 #endif
     {// No file uploaded, so just return
-        TCPIP_HTTP_NET_DynamicWriteString(vDcpt, "<b>Upload a File</b>", false);
+        TCPIP_HTTP_NET_DynamicWriteString(vDcpt, "<b> Upload a Bitmap </b>", false);
         return TCPIP_HTTP_DYN_PRINT_RES_DONE;
     }
 
