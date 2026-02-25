@@ -1,0 +1,5 @@
+24Stop.bmp
+24Danger.bmp
+Danger.bmp
+CROSS.bmp
+Prohibition.bmp
