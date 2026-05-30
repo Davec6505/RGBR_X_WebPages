@@ -3,6 +3,8 @@
 
 <h1>Control LED_O</h1>
 
+<p id="commandStatus" style="display:none; font-weight:bold; color:#0a5a0a;">Ready.</p>
+
 <p>Basic control commands to the LED_O display can be sent using this form.</p>
 <p>Send shape (XStart, YStart, XEnd, YEnd) for <b>size in x and y direction, left to right, top to bottom</b> prior to sending shape data:</p>
 <form method="get" action="forms.htm">
@@ -29,7 +31,7 @@
 <form method="get" action="forms.htm">
     <div class="examplebox" style="display: flex; flex-direction: column; align-items: flex-start;">
         <label for="shape"><b>Shape:</b></label>
-        <input type="number" id="shape" name="shape" placeholder="Shape" required style="margin-bottom: 8px;" min="0" max="0" value="0"/>
+        <input type="number" id="shape" name="shape" placeholder="Shape" required style="margin-bottom: 8px;" min="0" max="4" value="0"/>
 
         <label for="quantity"><b>Quantity:</b></label>
         <input type="number" id="quantity" name="quantity" placeholder="Quantity" required style="margin-bottom: 8px;" min="1" value="1" required/>
@@ -161,28 +163,98 @@ document.getElementById('hello').innerHTML = "~hellomsg~";
 </script>
 <script>
 window.onload = function() {
-    // Parse query string
     const params = new URLSearchParams(window.location.search);
+    const keyPrefix = "ledo.forms.";
+    const statusEl = document.getElementById("commandStatus");
 
-    // Restore values for all input fields except hidden and submit
+    function setStatus(message, isError) {
+        if (!statusEl) {
+            return;
+        }
+
+        statusEl.style.display = "block";
+        statusEl.style.color = isError ? "#a40000" : "#0a5a0a";
+        statusEl.textContent = message;
+    }
+
+    function restoreElementValue(el) {
+        if (!el.name) {
+            return;
+        }
+
+        const storageKey = keyPrefix + el.name;
+        if (params.has(el.name)) {
+            const v = params.get(el.name);
+            el.value = v;
+            localStorage.setItem(storageKey, v);
+            return;
+        }
+
+        const saved = localStorage.getItem(storageKey);
+        if (saved !== null) {
+            el.value = saved;
+        }
+    }
+
     document.querySelectorAll('input[name]').forEach(function(input) {
-        if (input.type !== "hidden" && input.type !== "submit" && params.has(input.name)) {
-            input.value = params.get(input.name);
+        if (input.type !== "hidden" && input.type !== "submit") {
+            restoreElementValue(input);
         }
     });
 
-    // Restore values for select elements
     document.querySelectorAll('select[name]').forEach(function(select) {
-        if (params.has(select.name)) {
-            select.value = params.get(select.name);
-        }
+        restoreElementValue(select);
     });
 
-    // Restore values for textarea elements
     document.querySelectorAll('textarea[name]').forEach(function(textarea) {
-        if (params.has(textarea.name)) {
-            textarea.value = params.get(textarea.name);
-        }
+        restoreElementValue(textarea);
+    });
+
+    document.querySelectorAll('form').forEach(function(form) {
+        form.addEventListener('submit', function(event) {
+            const submitButton = form.querySelector('input[type="submit"]');
+            const formData = new FormData(form);
+            const formAction = form.getAttribute('action') || 'forms.htm';
+            const formQuery = new URLSearchParams(formData).toString();
+
+            event.preventDefault();
+
+            form.querySelectorAll('input[name], select[name], textarea[name]').forEach(function(el) {
+                if (el.type !== "hidden" && el.type !== "submit") {
+                    localStorage.setItem(keyPrefix + el.name, el.value);
+                }
+            });
+
+            if (submitButton) {
+                submitButton.disabled = true;
+            }
+
+            setStatus("Sending command...", false);
+
+            fetch(formAction + "?" + formQuery, {
+                method: "GET",
+                cache: "no-store",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            }).then(function(response) {
+                if (!response.ok) {
+                    throw new Error("HTTP " + response.status);
+                }
+                return response.text();
+            }).then(function() {
+                setStatus("Command sent.", false);
+                if (window.history && window.history.replaceState) {
+                    window.history.replaceState(null, "", formAction);
+                }
+            }).catch(function(error) {
+                setStatus("Command failed: " + error.message, true);
+            }).finally(function() {
+                if (submitButton) {
+                    submitButton.disabled = false;
+                }
+            });
+        });
     });
 };
 </script>
