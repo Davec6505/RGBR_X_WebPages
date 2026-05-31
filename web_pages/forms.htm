@@ -1,261 +1,361 @@
 <!--#include file="header.htm" -->
 <div id="content">
-
-<h1>Control LED_O</h1>
-
-<p id="commandStatus" style="display:none; font-weight:bold; color:#0a5a0a;">Ready.</p>
-
-<p>Basic control commands to the LED_O display can be sent using this form.</p>
-<p>Send shape (XStart, YStart, XEnd, YEnd) for <b>size in x and y direction, left to right, top to bottom</b> prior to sending shape data:</p>
-<form method="get" action="forms.htm">
-    <div class="examplebox" style="display: flex; flex-direction: column; align-items: flex-start;">
-        <label for="xStart"><b>X Start:</b></label>
-        <input type="number" id="xStart" name="xStart" placeholder="X Start" value="0" required />
-
-        <label for="yStart"><b>Y Start:</b></label>
-        <input type="number" id="yStart" name="yStart" placeholder="Y Start" value="10" required />
-
-        <label for="xEnd"><b>X End:</b></label>
-        <input type="number" id="xEnd" name="xEnd" placeholder="X End" value="10" required />
-
-        <label for="yEnd"><b>Y End: </b></label>
-        <input type="number" id="yEnd" name="yEnd" placeholder="Y End" value="10" required />
-
-        <input type="hidden" name="formid" value="start_positions" />
-        <input type="submit" value="Send" style="margin-top:5px;">
+<div class="control-dashboard" data-default-mode="~ui_mode_default~">
+    <div class="control-hero">
+        <h1>Control Console</h1>
+        <p>Issue shape, bitmap, text, border, and motion commands without leaving this page.</p>
     </div>
-</form>
-<br />
-<p>Send shape, quantity, weight, and color (all as numbers):</p>
-<!-- Shape, quantity, weight, and color form -->
-<form method="get" action="forms.htm">
-    <div class="examplebox" style="display: flex; flex-direction: column; align-items: flex-start;">
-        <label for="shape"><b>Shape:</b></label>
-        <input type="number" id="shape" name="shape" placeholder="Shape" required style="margin-bottom: 8px;" min="0" max="4" value="0"/>
 
-        <label for="quantity"><b>Quantity:</b></label>
-        <input type="number" id="quantity" name="quantity" placeholder="Quantity" required style="margin-bottom: 8px;" min="1" value="1" required/>
-
-        <label for="weight"><b>Weight:</b></label>
-        <input type="number" id="weight" name="weight" placeholder="Weight" required style="margin-bottom: 8px;" min="1" value="3" required/>
-
-        <label for="color"><b>Color:</b></label>
-        <input type="number" id="color" name="color" placeholder="Color" required style="margin-bottom: 8px;" value="31"/>
-        
-        <input type="hidden" name="formid" value="shape_data" />
-        <input type="submit" value="Send" style="margin-top:5px;">
+    <div class="control-toolbar">
+        <div class="mode-switch" role="group" aria-label="View Mode">
+            <button type="button" id="modeCompact" class="mode-btn active" onclick="return controlApplyMode('compact');">Compact</button>
+            <button type="button" id="modeAdvanced" class="mode-btn" onclick="return controlApplyMode('advanced');">Advanced</button>
+        </div>
+        <div class="preset-strip" role="group" aria-label="Quick Presets">
+            <button type="button" class="preset-btn" data-formid="shape_data" data-target="color" data-value="~ui_preset_shape_color~" onclick="return controlApplyPreset(this);">Blue Shape</button>
+            <button type="button" class="preset-btn" data-formid="text_properties" data-target="textColor" data-value="~ui_preset_text_color~" onclick="return controlApplyPreset(this);">Green Text</button>
+            <button type="button" class="preset-btn" data-formid="border" data-target="borderColor" data-value="~ui_preset_border_color~" onclick="return controlApplyPreset(this);">Red Border</button>
+            <button type="button" class="preset-btn" data-formid="fill_screen" data-target="fillColor" data-value="~ui_preset_fill_color~" data-target2="fill" data-value2="1" onclick="return controlApplyPreset(this);">White Fill</button>
+            <button type="button" class="preset-btn" data-formid="rotate" data-target="rotateSpeed" data-value="~ui_preset_rotate_speed~" onclick="return controlApplyPreset(this);">Rotate x3</button>
+        </div>
     </div>
-</form>
-<br />
-<p>Send bitmap number and quantity (the screen uses the bitmap x <b>pixel quantity</b> to space horizontally):</p>
-<!-- Bitmap number and quantity form -->
-<form method="get" action="forms.htm">
-    <div class="examplebox">
-        <label for="bitmapNum"><b>Bitmap Number:</b></label>
-        <input type="number" id="bitmapNum" name="bitmapNum" min="0" max="20" placeholder="Bitmap number" value="0"/>
-        &nbsp;
-        <label for="bitmapQty"><b>Quantity:</b></label>
-        <input type="number" id="bitmapQty" name="bitmapQty" min="1" max="4" value="1" />
-        <input type="hidden" name="formid" value="bitmap_data" />
-        <input type="submit" value="Send" style="margin-top:5px;">
+
+    <p id="commandStatus" class="command-status">Ready.</p>
+
+    <div class="control-grid">
+        <section class="control-card advanced-card">
+            <h2>Shape Bounds</h2>
+            <p>Set X/Y start and end before sending shape details.</p>
+            <form method="get" action="forms.htm" onsubmit="return controlSubmitForm(this);">
+                <div class="field-grid">
+                    <label for="xStart">X Start</label>
+                    <input type="number" id="xStart" name="xStart" placeholder="X Start" value="0" required />
+
+                    <label for="yStart">Y Start</label>
+                    <input type="number" id="yStart" name="yStart" placeholder="Y Start" value="10" required />
+
+                    <label for="xEnd">X End</label>
+                    <input type="number" id="xEnd" name="xEnd" placeholder="X End" value="10" required />
+
+                    <label for="yEnd">Y End</label>
+                    <input type="number" id="yEnd" name="yEnd" placeholder="Y End" value="10" required />
+                </div>
+                <input type="hidden" name="formid" value="start_positions" />
+                <input type="submit" class="cmd-btn" value="Send Bounds" />
+            </form>
+        </section>
+
+        <section class="control-card">
+            <h2>Shape Style</h2>
+            <p>Send shape, quantity, weight, and RGB565 color value.</p>
+            <form method="get" action="forms.htm" onsubmit="return controlSubmitForm(this);">
+                <div class="field-grid">
+                    <label for="shape">Shape (0-4)</label>
+                    <input type="number" id="shape" name="shape" placeholder="Shape" required min="0" max="4" value="0" />
+
+                    <label for="quantity">Quantity</label>
+                    <input type="number" id="quantity" name="quantity" placeholder="Quantity" required min="1" value="1" />
+
+                    <label for="weight">Weight</label>
+                    <input type="number" id="weight" name="weight" placeholder="Weight" required min="1" value="3" />
+
+                    <label for="color">Color (RGB565)</label>
+                    <div class="input-with-preview">
+                        <input type="number" id="color" name="color" placeholder="Color" required value="31" data-rgb565-preview="shapeColorSwatch" />
+                        <span id="shapeColorSwatch" class="color-swatch" title="Color preview"></span>
+                    </div>
+                </div>
+                <input type="hidden" name="formid" value="shape_data" />
+                <input type="submit" class="cmd-btn" value="Send Shape" />
+            </form>
+        </section>
+
+        <section class="control-card">
+            <h2>Bitmap</h2>
+            <p>Choose bitmap index and pixel quantity spacing.</p>
+            <form method="get" action="forms.htm" onsubmit="return controlSubmitForm(this);">
+                <div class="field-grid two-col">
+                    <label for="bitmapNum">Bitmap Number</label>
+                    <input type="number" id="bitmapNum" name="bitmapNum" min="0" max="20" placeholder="Bitmap Number" value="0" />
+
+                    <label for="bitmapQty">Quantity</label>
+                    <input type="number" id="bitmapQty" name="bitmapQty" min="1" max="4" value="1" />
+                </div>
+                <input type="hidden" name="formid" value="bitmap_data" />
+                <input type="submit" class="cmd-btn" value="Send Bitmap" />
+            </form>
+        </section>
+
+        <section class="control-card advanced-card">
+            <h2>Border</h2>
+            <p>Apply top and bottom border band with color.</p>
+            <form method="get" action="forms.htm" onsubmit="return controlSubmitForm(this);">
+                <div class="field-grid two-col">
+                    <label for="borderWeight">Border Weight</label>
+                    <input type="number" id="borderWeight" name="borderWeight" min="0" max="20" placeholder="Border Weight" value="4" />
+
+                    <label for="borderColor">Border Color (RGB565)</label>
+                    <div class="input-with-preview">
+                        <input type="number" id="borderColor" name="borderColor" min="0" max="63488" placeholder="Border Color" value="63488" data-rgb565-preview="borderColorSwatch" />
+                        <span id="borderColorSwatch" class="color-swatch" title="Color preview"></span>
+                    </div>
+                </div>
+                <input type="hidden" name="formid" value="border" />
+                <input type="submit" class="cmd-btn" value="Set Border" />
+            </form>
+        </section>
+
+        <section class="control-card">
+            <h2>Text Properties</h2>
+            <p>Set position and text color before sending a custom message.</p>
+            <form method="get" action="forms.htm" onsubmit="return controlSubmitForm(this);">
+                <div class="field-grid">
+                    <label for="xPos">X Position</label>
+                    <input type="number" id="xPos" name="xPos" placeholder="X Position" required value="0" />
+
+                    <label for="yPos">Y Position</label>
+                    <input type="number" id="yPos" name="yPos" placeholder="Y Position" required value="10" />
+
+                    <label for="textColor">Text Color (RGB565)</label>
+                    <div class="input-with-preview">
+                        <input type="number" id="textColor" name="textColor" placeholder="Text Color" required value="2016" data-rgb565-preview="textColorSwatch" />
+                        <span id="textColorSwatch" class="color-swatch" title="Color preview"></span>
+                    </div>
+                </div>
+                <input type="hidden" name="formid" value="text_properties" />
+                <input type="submit" class="cmd-btn" value="Set Text Properties" />
+            </form>
+        </section>
+
+        <section class="control-card advanced-card">
+            <h2>Font</h2>
+            <p>Choose an active font for message rendering.</p>
+            <form method="get" action="forms.htm" onsubmit="return controlSubmitForm(this);">
+                <div class="field-grid">
+                    <label for="font">Font</label>
+                    <select id="font" name="font">
+                        <option value="Arial8x11">Arial 8x11</option>
+                        <option value="Rockwell8x9">Rockwell 8x9</option>
+                        <option value="ArialIt11x11">Arial Italic 11x11</option>
+                        <option value="Segoe_UI_Semibold13x14">Segoe UI Semibold 13x14</option>
+                    </select>
+                </div>
+                <input type="hidden" name="formid" value="send_font" />
+                <input type="submit" class="cmd-btn" value="Set Font" />
+            </form>
+        </section>
+
+        <section class="control-card control-card-wide">
+            <h2>Custom Message</h2>
+            <p>Send a custom message to the LED_O display (up to 59 chars).</p>
+            <form method="get" action="forms.htm" onsubmit="return controlSubmitForm(this);">
+                <div class="field-grid">
+                    <label for="mtext">Message Text</label>
+                    <input type="text" id="mtext" name="mtext" size="59" maxlength="59" placeholder="Enter your data here" />
+                </div>
+                <input type="hidden" name="formid" value="custom_message" />
+                <input type="submit" class="cmd-btn" value="Send Message" />
+            </form>
+        </section>
+
+        <section class="control-card advanced-card">
+            <h2>Rotation</h2>
+            <p>Set direction and speed. Use speed 0 to disable rotation.</p>
+            <form method="get" action="forms.htm" onsubmit="return controlSubmitForm(this);">
+                <div class="field-grid two-col">
+                    <label for="rotateDir">Direction (0 left, 1 right)</label>
+                    <input type="number" id="rotateDir" name="rotateDir" min="0" max="1" placeholder="Direction" />
+
+                    <label for="rotateSpeed">Rotate Speed</label>
+                    <input type="number" id="rotateSpeed" name="rotateSpeed" min="0" placeholder="Speed" />
+                </div>
+                <input type="hidden" name="formid" value="rotate" />
+                <input type="submit" class="cmd-btn" value="Set Rotation" />
+            </form>
+        </section>
+
+        <section class="control-card advanced-card">
+            <h2>Fill Screen</h2>
+            <p>Toggle fill and choose fill color.</p>
+            <form method="get" action="forms.htm" onsubmit="return controlSubmitForm(this);">
+                <div class="field-grid two-col">
+                    <label for="fill">Fill (0 off, 1 on)</label>
+                    <input type="number" id="fill" name="fill" min="0" max="1" placeholder="Fill" />
+
+                    <label for="fillColor">Fill Color (RGB565)</label>
+                    <div class="input-with-preview">
+                        <input type="number" id="fillColor" name="fillColor" min="0" max="65535" placeholder="Fill Color" value="63488" data-rgb565-preview="fillColorSwatch" />
+                        <span id="fillColorSwatch" class="color-swatch" title="Color preview"></span>
+                    </div>
+                </div>
+                <input type="hidden" name="formid" value="fill_screen" />
+                <input type="submit" class="cmd-btn" value="Apply Fill" />
+            </form>
+        </section>
     </div>
-</form>
-<br />
-<p>Set screen border weight and color (adds a band around the top and bottom of the screen <i>weight = pixel depth</i>):</p>
-<!-- Border weight and color form -->
-<form method="get" action="forms.htm">
-    <div class="examplebox">
-        <label for="borderWeight"><b>Border weight:</b></label>
-        <input type="number" id="borderWeight" name="borderWeight" min="0" max="20" placeholder="Border weight" value="4" />
-        &nbsp;
-        <label for="borderColor"><b>Border color:</b></label>
-        <input type="number" id="borderColor" name="borderColor" min="0" max="63488" placeholder="Border color" value="63488" />
-        <input type="hidden" name="formid" value="border" />
-        <input type="submit" value="Send" style="margin-top:5px;">
-    </div>
-</form>
-<br />
-<p>Send text properties with X Position, Y Position, and Text Color (set these vaules prior to sending text):</p>
-<!-- Text properties form -->
-<form method="get" action="forms.htm">
-    <div class="examplebox" style="display: flex; flex-direction: column; align-items: flex-start;">
-        <label for="xPos"><b>X Position:</b></label>
-        <input type="number" id="xPos" name="xPos" placeholder="X Position" required style="margin-bottom: 8px;" value="0"/>
-
-        <label for="yPos"><b>Y Position:</b></label>
-        <input type="number" id="yPos" name="yPos" placeholder="Y Position" required style="margin-bottom: 8px;" value="10"/>
-
-        <label for="textColor"><b>Text Color:</b></label>
-        <input type="number" id="textColor" name="textColor" placeholder="Text Color" required style="margin-bottom: 8px;" value="2016"/>
-
-        <input type="hidden" name="formid" value="text_properties" />
-        <input type="submit" value="Send" style="margin-top:5px;">
-    </div>
-</form>
-<br />
-<p>Change font.</p>
-<!-- Font selection form -->
- <form method="get" action="forms.htm">
-    <div class="examplebox">
-        <label for="font"><b>Font:</b></label>
-        <select id="font" name="font" style="width: 160px;">
-            <option value="Arial8x11">Arial 8x11</option>
-            <option value="Rockwell8x9">Rockwell 8x9</option>
-            <option value="ArialIt11x11">Arial Italic 11x11</option>
-            <option value="Segoe_UI_Semibold13x14">Segoe UI Semibold 13x14</option>
-        </select>
-        <input type="hidden" name="formid" value="send_font" />
-        <input type="submit" value="Send" style="margin-top:5px;">
-    </div>
-</form>
-<br />
-<p>Send a custom message to the LED_O displayEnter the text to display <i>(30 char max)</i>:</p>
-<!-- Custom message form -->
-<form method="get" action="forms.htm">
-    <div class="examplebox">
-        <label for="mtext"><b>Send Data:</b></label>
-        <input type="text" id="mtext" name="mtext" size="30" placeholder="Enter your data here" />
-
-        <input type="hidden" name="formid" value="custom_message" />
-        <input type="submit" value="Send" style="margin-top:5px;">
-    </div>
-</form>
-<br />
-
-<p>Rotate direction and speed (speed of 0 = no rotation, speed depends on bitmap, shape or text):</p>
-<!-- Rotate direction and speed form -->
-<form method="get" action="forms.htm">
-    <div class="examplebox">
-        <label for="rotateDir"><b>Rotate Direction (0 or 1):</b></label>
-        <input type="number" id="rotateDir" name="rotateDir" min="0" max="1" placeholder="0=Left, 1=Right" />
-        &nbsp;
-        <label for="rotateSpeed"><b>Rotate Speed:</b></label>
-        <input type="number" id="rotateSpeed" name="rotateSpeed" min="0" placeholder="Speed" />
-
-        <input type="hidden" name="formid" value="rotate" />
-        <input type="submit" value="Send" style="margin-top:5px;">
-    </div>
-</form>
-<br />
-<!-- Fill screen form -->
-<p>Fill screen (0=No Fill, 1=Fill):</p>
-<form method="get" action="forms.htm">
-    <div class="examplebox">
-        <label for="fill"><b>Fill Screen (0 or 1):</b></label>
-        <input type="number" id="fill" name="fill" min="0" max="1" placeholder="0=No Fill, 1=Fill" />
-        &nbsp;
-        <label for="fillColor"><b>Fill Color:</b></label>
-        <input type="number" id="fillColor" name="fillColor" min="0" max="63488" placeholder="Fill color" value="63488" />
-
-        <input type="hidden" name="formid" value="fill_screen" />
-        <input type="submit" value="Send" style="margin-top:5px;">
-    </div>
-</form>
-<br />
-
 </div>
-<script type="text/javascript">
-
-    
-<!--
-document.getElementById('hello').innerHTML = "~hellomsg~";
--->
-</script>
+</div>
 <script>
-window.onload = function() {
-    const params = new URLSearchParams(window.location.search);
-    const keyPrefix = "ledo.forms.";
-    const statusEl = document.getElementById("commandStatus");
+var helloEl = document.getElementById('hello');
+if (helloEl) {
+    helloEl.innerHTML = "~hellomsg~";
+}
 
-    function setStatus(message, isError) {
-        if (!statusEl) {
-            return;
-        }
-
-        statusEl.style.display = "block";
-        statusEl.style.color = isError ? "#a40000" : "#0a5a0a";
-        statusEl.textContent = message;
+function controlSetStatus(message, isError) {
+    var statusEl = document.getElementById('commandStatus');
+    if (!statusEl) {
+        return;
     }
+    statusEl.style.display = 'block';
+    statusEl.className = isError ? 'command-status error' : 'command-status success';
+    statusEl.innerHTML = message;
+}
 
-    function restoreElementValue(el) {
+function controlBuildQuery(form) {
+    var nodes = form.getElementsByTagName('*');
+    var i;
+    var el;
+    var pairs = [];
+    for (i = 0; i < nodes.length; i++) {
+        el = nodes[i];
         if (!el.name) {
+            continue;
+        }
+        if (el.tagName !== 'INPUT' && el.tagName !== 'SELECT' && el.tagName !== 'TEXTAREA') {
+            continue;
+        }
+        if ((el.type === 'checkbox' || el.type === 'radio') && !el.checked) {
+            continue;
+        }
+        pairs.push(encodeURIComponent(el.name) + '=' + encodeURIComponent(el.value));
+    }
+    return pairs.join('&');
+}
+
+function controlSendGet(url, onOk, onErr) {
+    var xhr = null;
+    if (window.XMLHttpRequest) {
+        xhr = new XMLHttpRequest();
+    } else if (window.ActiveXObject) {
+        xhr = new ActiveXObject('Microsoft.XMLHTTP');
+    }
+
+    if (!xhr) {
+        if (onErr) {
+            onErr();
+        }
+        return;
+    }
+
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState !== 4) {
             return;
         }
-
-        const storageKey = keyPrefix + el.name;
-        if (params.has(el.name)) {
-            const v = params.get(el.name);
-            el.value = v;
-            localStorage.setItem(storageKey, v);
-            return;
+        if (xhr.status >= 200 && xhr.status < 300) {
+            if (onOk) {
+                onOk();
+            }
+        } else {
+            if (onErr) {
+                onErr(xhr.status);
+            }
         }
+    };
+    xhr.open('GET', url, true);
+    xhr.send(null);
+}
 
-        const saved = localStorage.getItem(storageKey);
-        if (saved !== null) {
-            el.value = saved;
+function controlSubmitForm(form) {
+    var action = form.getAttribute('action') || 'forms.htm';
+    var query = controlBuildQuery(form);
+    controlSetStatus('Sending command...', false);
+    controlSendGet(action + '?' + query, function() {
+        controlSetStatus('Command sent.', false);
+    }, function(status) {
+        controlSetStatus('Command failed' + (status ? ': HTTP ' + status : ''), true);
+    });
+    return false;
+}
+
+function controlFindFormById(formId) {
+    var forms = document.getElementsByTagName('form');
+    var i;
+    var j;
+    var inputs;
+    for (i = 0; i < forms.length; i++) {
+        inputs = forms[i].getElementsByTagName('input');
+        for (j = 0; j < inputs.length; j++) {
+            if (inputs[j].name === 'formid' && inputs[j].value === formId) {
+                return forms[i];
+            }
+        }
+    }
+    return null;
+}
+
+function controlApplyMode(mode) {
+    var dashboard = document.getElementsByTagName('div');
+    var compactBtn = document.getElementById('modeCompact');
+    var advancedBtn = document.getElementById('modeAdvanced');
+    var i;
+
+    for (i = 0; i < dashboard.length; i++) {
+        if ((' ' + dashboard[i].className + ' ').indexOf(' control-dashboard ') >= 0) {
+            dashboard[i].className = (mode === 'advanced') ? 'control-dashboard advanced-mode' : 'control-dashboard compact-mode';
+            break;
         }
     }
 
-    document.querySelectorAll('input[name]').forEach(function(input) {
-        if (input.type !== "hidden" && input.type !== "submit") {
-            restoreElementValue(input);
-        }
-    });
+    if (compactBtn) {
+        compactBtn.className = (mode === 'compact') ? 'mode-btn active' : 'mode-btn';
+    }
+    if (advancedBtn) {
+        advancedBtn.className = (mode === 'advanced') ? 'mode-btn active' : 'mode-btn';
+    }
+    return false;
+}
 
-    document.querySelectorAll('select[name]').forEach(function(select) {
-        restoreElementValue(select);
-    });
+function controlApplyPreset(btn) {
+    var targetId = btn.getAttribute('data-target');
+    var value = btn.getAttribute('data-value');
+    var targetId2 = btn.getAttribute('data-target2');
+    var value2 = btn.getAttribute('data-value2');
+    var formId = btn.getAttribute('data-formid');
+    var target = targetId ? document.getElementById(targetId) : null;
+    var target2 = targetId2 ? document.getElementById(targetId2) : null;
+    var form;
 
-    document.querySelectorAll('textarea[name]').forEach(function(textarea) {
-        restoreElementValue(textarea);
-    });
+    if (!target || !value || value.charAt(0) === '~') {
+        return false;
+    }
+    target.value = value;
 
-    document.querySelectorAll('form').forEach(function(form) {
-        form.addEventListener('submit', function(event) {
-            const submitButton = form.querySelector('input[type="submit"]');
-            const formData = new FormData(form);
-            const formAction = form.getAttribute('action') || 'forms.htm';
-            const formQuery = new URLSearchParams(formData).toString();
+    if (target2 && value2 && value2.charAt(0) !== '~') {
+        target2.value = value2;
+    }
 
-            event.preventDefault();
+    form = controlFindFormById(formId);
+    if (form) {
+        controlSetStatus('Applying preset...', false);
+        return controlSubmitForm(form);
+    }
 
-            form.querySelectorAll('input[name], select[name], textarea[name]').forEach(function(el) {
-                if (el.type !== "hidden" && el.type !== "submit") {
-                    localStorage.setItem(keyPrefix + el.name, el.value);
-                }
-            });
+    return false;
+}
 
-            if (submitButton) {
-                submitButton.disabled = true;
+(function() {
+    var mode = 'compact';
+    var dashboards = document.getElementsByTagName('div');
+    var i;
+    for (i = 0; i < dashboards.length; i++) {
+        if ((' ' + dashboards[i].className + ' ').indexOf(' control-dashboard ') >= 0) {
+            if (dashboards[i].getAttribute('data-default-mode') === 'advanced') {
+                mode = 'advanced';
             }
-
-            setStatus("Sending command...", false);
-
-            fetch(formAction + "?" + formQuery, {
-                method: "GET",
-                cache: "no-store",
-                headers: {
-                    "X-Requested-With": "XMLHttpRequest"
-                }
-            }).then(function(response) {
-                if (!response.ok) {
-                    throw new Error("HTTP " + response.status);
-                }
-                return response.text();
-            }).then(function() {
-                setStatus("Command sent.", false);
-                if (window.history && window.history.replaceState) {
-                    window.history.replaceState(null, "", formAction);
-                }
-            }).catch(function(error) {
-                setStatus("Command failed: " + error.message, true);
-            }).finally(function() {
-                if (submitButton) {
-                    submitButton.disabled = false;
-                }
-            });
-        });
-    });
-};
+            break;
+        }
+    }
+    controlApplyMode(mode);
+})();
 </script>
 <!--#include file="footer.htm" -->

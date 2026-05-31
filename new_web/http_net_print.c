@@ -83,6 +83,12 @@ static HTTP_APP_DYNVAR_ENTRY HTTP_APP_DynVarTbl[] =
 {"ddns_user",					TCPIP_HTTP_Print_ddns_user},
 {"ddns_pass",					TCPIP_HTTP_Print_ddns_pass},
 {"ddns_host",					TCPIP_HTTP_Print_ddns_host},
+{"ui_mode_default",					TCPIP_HTTP_Print_ui_mode_default},
+{"ui_preset_shape_color",					TCPIP_HTTP_Print_ui_preset_shape_color},
+{"ui_preset_text_color",					TCPIP_HTTP_Print_ui_preset_text_color},
+{"ui_preset_border_color",					TCPIP_HTTP_Print_ui_preset_border_color},
+{"ui_preset_fill_color",					TCPIP_HTTP_Print_ui_preset_fill_color},
+{"ui_preset_rotate_speed",					TCPIP_HTTP_Print_ui_preset_rotate_speed},
 };
 
 // Function that processes the dynamic variables
