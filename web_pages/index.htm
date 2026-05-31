@@ -24,25 +24,112 @@
 <tr><td><b>Build Date:</b></td><td>&nbsp;</td><td>~builddate~</td></tr>
 </table>
 
-<p>LED_O is an industrial alarm and information display designed for deterministic, real-time communication over Modbus TCP.</p>
+<style type="text/css">
+.overview-hero {
+	margin: 16px 0 22px 0;
+	padding: 18px;
+	border: 1px solid #cfd6df;
+	border-radius: 10px;
+	background: linear-gradient(135deg, #f7fbff 0%, #edf5ff 100%);
+}
 
-<p>It provides 360&deg visibility with a 128x64 RGB display and supports text, shapes, bitmap assets, and full-screen color fills. The system is optimized for predictable command-to-display response in PLC-driven control and monitoring environments.</p>
-<p>LED_O can present numeric process values alongside graphics to improve operator awareness at a glance.</p>
+.overview-hero h2 {
+	margin: 0 0 8px 0;
+	font-size: 24px;
+	line-height: 1.2;
+	color: #123f6b;
+}
+
+.overview-hero p {
+	margin: 8px 0;
+	max-width: 900px;
+	line-height: 1.5;
+}
+
+.overview-stats {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	gap: 10px;
+	margin-top: 14px;
+}
+
+.overview-stat {
+	background: #ffffff;
+	border: 1px solid #d9e2ec;
+	border-radius: 8px;
+	padding: 10px 12px;
+}
+
+.overview-stat .label {
+	display: block;
+	font-size: 11px;
+	color: #4f647a;
+	text-transform: uppercase;
+	letter-spacing: 0.6px;
+	margin-bottom: 4px;
+}
+
+.overview-stat .value {
+	font-size: 16px;
+	font-weight: 700;
+	color: #0f2f51;
+}
+
+.feature-grid {
+	list-style: none;
+	padding: 0;
+	margin: 12px 0 18px 0;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+	gap: 10px;
+}
+
+.feature-grid li {
+	border: 1px solid #d8e0ea;
+	border-radius: 8px;
+	background: #ffffff;
+	padding: 10px 12px;
+	line-height: 1.4;
+}
+
+.feature-grid b {
+	color: #103c64;
+}
+
+.overview-note {
+	padding: 10px 12px;
+	border-left: 4px solid #2d6fa6;
+	background: #f3f8fd;
+	border-radius: 4px;
+	margin-top: 8px;
+}
+</style>
+
+<section class="overview-hero">
+	<h2>Industrial Alarm and Information Display</h2>
+	<p>LED_O is built for deterministic, real-time communication over Modbus TCP in PLC-driven control systems.</p>
+	<p>It provides 360&deg visibility on a 128x64 RGB display and supports text, shapes, bitmap assets, and full-screen color fills for clear operator messaging.</p>
+	<div class="overview-stats">
+		<div class="overview-stat"><span class="label">Resolution</span><span class="value">128 x 64</span></div>
+		<div class="overview-stat"><span class="label">Protocol</span><span class="value">Modbus TCP</span></div>
+		<div class="overview-stat"><span class="label">Color Format</span><span class="value">RGB565</span></div>
+		<div class="overview-stat"><span class="label">Primary Use</span><span class="value">Industrial Alarm UI</span></div>
+	</div>
+</section>
 
 <h2>Key Features</h2>
 
-<ul>
-<li><b>360&deg visibility</b> for real-time process and alarm data.</li>
-<li><b>Modbus TCP server interface</b> for PLC and SCADA integration.</li>
-<li><b>Text, shapes, bitmaps, and fill effects</b> for clear visual messaging.</li>
-<li><b>Configurable bitmap library</b> for application-specific symbols.</li>
-<li><b>RGB565 color rendering</b> tuned for bright, readable industrial output.</li>
-<li><b>Numeric display support</b> for both integer and real-value presentation.</li>
-<li><b>Expandable asset workflow</b> for adding additional bitmap content.</li>
+<ul class="feature-grid">
+	<li><b>360&deg visibility:</b> Real-time process and alarm data visible from all sides.</li>
+	<li><b>PLC and SCADA integration:</b> Modbus TCP server interface for direct control-system connectivity.</li>
+	<li><b>Visual command set:</b> Text, shapes, bitmaps, and fill effects for high-clarity status messaging.</li>
+	<li><b>Configurable bitmap library:</b> Application-specific symbol sets for site-level customization.</li>
+	<li><b>Readable color tuning:</b> RGB565 rendering optimized for bright industrial readability.</li>
+	<li><b>Numeric data display:</b> Integer and real-value presentation for live process indicators.</li>
+	<li><b>Expandable asset workflow:</b> Additional bitmap content can be added as project needs grow.</li>
 </ul>
 
-
-<p>For complete technical details, refer to the LED_O product manual.</p>
+<p class="overview-note">For complete technical details, refer to the LED_O product manual.</p>
 
 </div>
 

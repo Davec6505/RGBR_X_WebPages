@@ -1,14 +1,142 @@
 <!--#include file="header.htm" -->
 <div id="content">
 
+<style type="text/css">
+.modbus-shell {
+	max-width: 1000px;
+}
+
+.modbus-lead {
+	padding: 12px 14px;
+	border: 1px solid #d4dde7;
+	border-radius: 8px;
+	background: #f7fbff;
+	line-height: 1.5;
+	margin-bottom: 14px;
+}
+
+.fc-list {
+	list-style: none;
+	padding: 0;
+	margin: 8px 0 14px 0;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 8px;
+}
+
+.fc-list li {
+	border: 1px solid #d6e0ea;
+	border-radius: 8px;
+	padding: 8px 10px;
+	background: #fff;
+}
+
+.fc-badge {
+	display: inline-block;
+	font-weight: 700;
+	min-width: 34px;
+	text-align: center;
+	padding: 2px 6px;
+	border-radius: 14px;
+	margin-right: 8px;
+	color: #0d2f4e;
+	background: #d9ebfb;
+	border: 1px solid #b7d8f4;
+}
+
+.modbus-toc {
+	margin: 10px 0 14px 0;
+	padding: 10px 12px;
+	border: 1px solid #d6e0ea;
+	border-radius: 8px;
+	background: #ffffff;
+}
+
+.modbus-toc ul {
+	margin: 6px 0 0 18px;
+	padding: 0;
+	columns: 2;
+	column-gap: 30px;
+}
+
+.modbus-toc li {
+	margin: 4px 0;
+}
+
+.modbus-toc a {
+	color: #1f5d92;
+	text-decoration: none;
+}
+
+.modbus-toc a:hover {
+	text-decoration: underline;
+}
+
+.modbus-note {
+	margin-top: 8px;
+	padding: 8px 10px;
+	border-left: 4px solid #2c6ea4;
+	background: #f3f8fd;
+	border-radius: 4px;
+}
+
+.reg-group {
+	border: 1px solid #d7e1eb;
+	border-radius: 8px;
+	background: #fff;
+	margin: 8px 0;
+	overflow: hidden;
+}
+
+.reg-group summary {
+	cursor: pointer;
+	list-style: none;
+	padding: 10px 12px;
+	font-weight: 700;
+	color: #113c63;
+	background: #f7fbff;
+	border-bottom: 1px solid #e4ecf3;
+}
+
+.reg-group summary::-webkit-details-marker {
+	display: none;
+}
+
+.reg-group .group-body {
+	padding: 10px 12px 8px 12px;
+}
+
+.sub-list {
+	margin: 0 0 4px 18px;
+}
+
+.ops-list {
+	margin: 8px 0 14px 0;
+	padding-left: 18px;
+}
+
+.chip {
+	display: inline-block;
+	padding: 1px 8px;
+	font-size: 11px;
+	border-radius: 12px;
+	background: #eef4fb;
+	border: 1px solid #cfe0ef;
+	color: #244e72;
+	margin-left: 6px;
+}
+</style>
+
+<div class="modbus-shell">
+
 <h1>Modbus TCP</h1>
-<p>LED_O is controlled through Modbus TCP using a zero-based register map (0-99).</p>
+<p class="modbus-lead">LED_O is controlled through Modbus TCP using a zero-based register map (0-99). This page is designed for quick PLC implementation and commissioning reference.</p>
 <h2>Function Codes (Hex)</h2>
-<ul>
-	<li><b>01</b> - Control-bit operation used by this firmware profile.</li>
-	<li><b>03</b> - Read display-related register values (0-99).</li>
-	<li><b>06</b> - Write one holding register (single value update).</li>
-	<li><b>10</b> - Write multiple holding registers (block update).</li>
+<ul class="fc-list">
+	<li><span class="fc-badge">01</span> Control-bit operation used by this firmware profile.</li>
+	<li><span class="fc-badge">03</span> Read display-related register values (0-99).</li>
+	<li><span class="fc-badge">06</span> Write one holding register (single value update).</li>
+	<li><span class="fc-badge">10</span> Write multiple holding registers (block update).</li>
 </ul>
 
 <p><i>Note: This implementation targets the control/read behavior used by the LED_O firmware profile.</i></p>
@@ -17,109 +145,107 @@
 <p>All addresses on this page are <b>zero-based</b> (0-99).<br />
 	Use direct zero-based addressing for this device; 40000-style addressing is not used.</p>
 
-<h2>Control Register Map</h2>
-<br />
-<ul>
-<li><b>0 - 3</b>: [XStart, YStart, XEnd, YEnd].
-<ul class="sub-list">
-	<li>Defines geometry bounds in pixels for shapes and motion paths.</li>
-	<li>Typical sequence: set these first, then send shape/style registers.</li>
-</ul></li>
+<div class="modbus-toc">
+	<b>Quick Navigation</b>
+	<ul>
+		<li><a href="#regmap">Control Register Map</a></li>
+		<li><a href="#group-0-3">0-3 Geometry</a></li>
+		<li><a href="#group-4-7">4-7 Shape Style</a></li>
+		<li><a href="#group-8-11">8-11 Bitmap/Border</a></li>
+		<li><a href="#group-12-17">12-17 Text and Units</a></li>
+		<li><a href="#group-18-29">18-29 Limits, Rotation, Fill</a></li>
+		<li><a href="#group-30-99">30-99 Payload and Values</a></li>
+		<li><a href="#write-seq">Recommended Write Sequence</a></li>
+		<li><a href="#plc-notes">PLC Integration Notes</a></li>
+	</ul>
+</div>
 
-<li><b>4 - 7</b>: [Shape, Quantity, Weight, Color].
-<ul class="sub-list">
-	<li><i>Shape</i> - 0 = Rectangle, 1 = Triangle, 2 = Circle, 3 = Segment Line, 4 = Line.</li>
-	<li><i>Quantity</i> - Repeat count; practical max depends on width and spacing.</li>
-	<li><i>Weight</i> - Edge/line thickness in pixels.</li>
-	<li><i>Color</i> - RGB565 color value (16-bit: R5/G6/B5).</li>
-</ul></li>
+<h2 id="regmap">Control Register Map</h2>
 
-<li><b>8 - 9</b>: [Bitmap, Quantity]
-<ul class="sub-list">
-	<li><i>Bitmap</i> - Bitmap index from installed assets.</li>
-	<li><i>Quantity</i> - Repeat count constrained by display width and bitmap width.</li>
-</ul></li>
+<details class="reg-group" id="group-0-3" open>
+	<summary>0 - 3: Geometry <span class="chip">XStart/YStart/XEnd/YEnd</span></summary>
+	<div class="group-body">
+		<ul class="sub-list">
+			<li>Defines geometry bounds in pixels for shapes and motion paths.</li>
+			<li>Typical sequence: set these first, then send shape/style registers.</li>
+		</ul>
+	</div>
+</details>
 
-<li><b>10 - 11</b>: [Border Weight, Border Color]
-<ul class="sub-list">
-	<li><i>Border Weight</i> - Top and bottom band thickness in pixels.</li>
-	<li><i>Border Color</i> - RGB565 color value.</li>
-</ul></li>
+<details class="reg-group" id="group-4-7" open>
+	<summary>4 - 7: Shape Style <span class="chip">Shape/Quantity/Weight/Color</span></summary>
+	<div class="group-body">
+		<ul class="sub-list">
+			<li><i>Shape</i> - 0 = Rectangle, 1 = Triangle, 2 = Circle, 3 = Segment Line, 4 = Line.</li>
+			<li><i>Quantity</i> - Repeat count; practical max depends on width and spacing.</li>
+			<li><i>Weight</i> - Edge/line thickness in pixels.</li>
+			<li><i>Color</i> - RGB565 color value (16-bit: R5/G6/B5).</li>
+		</ul>
+	</div>
+</details>
 
-<li><b>12 - 15</b>: [Text XPos, Text YPos, Text Color, Font Type]
-<ul class="sub-list">
-	<li><i>Text XPos / YPos</i> - Text anchor position in pixels.</li>
-	<li><i>Text Color</i> - RGB565 color value.</li>
-	<li><i>Font Type</i> - Font selector index/value.</li>
-</ul></li>
+<details class="reg-group" id="group-8-11">
+	<summary>8 - 11: Bitmap and Border <span class="chip">Bitmap/Quantity/Border</span></summary>
+	<div class="group-body">
+		<ul class="sub-list">
+			<li><b>8 - 9</b>: Bitmap index and repeat count constrained by display width and bitmap width.</li>
+			<li><b>10 - 11</b>: Border weight (top/bottom band thickness) and border color (RGB565).</li>
+		</ul>
+	</div>
+</details>
 
-<li><b>16 - 17</b>: [SI Unit, Decimal Place].
-<ul class="sub-list">
-	<li><i>SI Unit</i> - Index into unit list: ["*C","*F","g","Kg","T","ml","l","%","ms","mm","rpm"].</li>
-	<li><i>Decimal Place</i> - Numeric precision for formatted values (recommended max: 4).</li>
-</ul></li>
+<details class="reg-group" id="group-12-17">
+	<summary>12 - 17: Text and Units <span class="chip">Text Pos/Color/Font/SI</span></summary>
+	<div class="group-body">
+		<ul class="sub-list">
+			<li><b>12 - 15</b>: Text XPos, Text YPos, Text Color, Font Type.</li>
+			<li><b>16 - 17</b>: SI Unit index and Decimal Place precision.</li>
+			<li>SI Unit list: ["*C","*F","g","Kg","T","ml","l","%","ms","mm","rpm"].</li>
+		</ul>
+	</div>
+</details>
 
-<li><b>18 - 23</b>: [LO Limit, HI Limit, Alarm LO, Alarm HI, Alarm LO Color, Alarm HI Color].
-<ul class="sub-list">
-	<li>Defines graph scaling and threshold-based alarm color behavior.</li>
-</ul></li>
+<details class="reg-group" id="group-18-29">
+	<summary>18 - 29: Limits, Rotation, Fill, Marquee Gap <span class="chip">Alarms/Motion/Fill</span></summary>
+	<div class="group-body">
+		<ul class="sub-list">
+			<li><b>18 - 23</b>: Graph scaling and threshold-based alarm colors.</li>
+			<li><b>24 - 25</b>: Rotation Direction and Rotation Speed (0 disables rotation; 1 fastest).</li>
+			<li><b>26 - 27</b>: Fill Screen (0/1) and Fill Color (RGB565).</li>
+			<li><b>28</b>: Text Marquee Gap, pixel spacing between long-scroll repeats.</li>
+			<li><b>29</b>: Reserved.</li>
+		</ul>
+	</div>
+</details>
 
-<li><b>24 - 25</b>: [Rotation Direction, Rotation Speed].
-<ul class="sub-list">
-	<li><i>Direction</i> - 0 = left-to-right, 1 = right-to-left.</li>
-	<li><i>Speed</i> - Frame-delay control. 0 disables rotation; 1 is fastest.</li>
-</ul></li>
+<details class="reg-group" id="group-30-99">
+	<summary>30 - 99: Text Payload and Numeric Values <span class="chip">Text/Integers/Reals</span></summary>
+	<div class="group-body">
+		<ul class="sub-list">
+			<li><b>30 - 59</b>: Text payload area (supports up to 59 visible characters plus null terminator safety).</li>
+			<li><b>60 - 79</b>: Integer holding-value area; primary displayed value starts at register 60.</li>
+			<li><b>80 - 89</b>: Read/write real-value area; primary displayed value starts at register 80.</li>
+			<li><b>90 - 99</b>: Read-only area reserved for extended/status use.</li>
+		</ul>
+	</div>
+</details>
 
-<li><b>26 - 27</b>: [Fill Screen, Fill Color].
-<ul class="sub-list">
-	<li><i>Fill Screen</i> - 0 = off, 1 = on.</li>
-	<li><i>Fill Color</i> - RGB565 color value.</li>
-</ul></li>
-
-<li><b>28</b>: [Text Marquee Gap].
-	<ul class="sub-list">
-		<li><i>Text Marquee Gap</i> - Pixel spacing inserted between repeats of long scrolling text.</li>
-		<li>Use lower values for tighter loops and higher values for clearer separation.</li>
-	</ul></li>
-
-<li><b>29</b>: [Reserved].</li>
-
-<li><b>30 - 59</b>: [Text].
-	<ul class="sub-list">
-		<li><i>Text</i> - Message payload area.</li>
-		<li>Current firmware path supports up to 59 visible characters plus null terminator safety.</li>
-	</ul></li>
-
-<li><b>60 - 79</b>: [Integer Values].
-	<ul class="sub-list">
-		<li><i>Integer</i> - Integer holding-value area; primary displayed value starts at register 60.</li>
-	</ul></li>
-
-<li><b>80 - 89</b>: [Real Values].
-	<ul class="sub-list">
-		<li><i>Read/Write</i> - Real-value area; primary displayed value starts at register 80.</li>
-	</ul></li>
-
-<li><b>90 - 99</b>: [Real Values].
-	<ul class="sub-list">
-		<li><i>Read-Only</i> - Reserved for extended/status use.</li>
-	</ul></li>
-</ul>
-
-<h2>Recommended Write Sequence</h2>
-<ul>
+<h2 id="write-seq">Recommended Write Sequence</h2>
+<ul class="ops-list">
 	<li>Set geometry first (0-3), then style/color (4-7), then motion/fill/text options.</li>
 	<li>Use <b>06</b> for low-frequency single-register edits and <b>10</b> for grouped updates that must stay coherent on screen.</li>
 	<li>For text updates, write properties (12-15 and 28), then write payload (30-59).</li>
 	<li>Use rotation speed 0 when staging a multi-step update if you want to avoid visible in-between frames.</li>
 </ul>
 
-<h2>PLC Integration Notes</h2>
-<ul>
+<h2 id="plc-notes">PLC Integration Notes</h2>
+<ul class="ops-list">
 	<li>Treat this as a zero-based holding-register map in your PLC tag layer.</li>
 	<li>For deterministic scan behavior, group related writes into one FC10 transaction whenever possible.</li>
 	<li>If your PLC uses 40001-style addressing, apply your driver offset so it targets register 0-99 on this device.</li>
 </ul>
+
+<p class="modbus-note"><b>Commissioning tip:</b> Start with FC06 for step-by-step verification, then migrate to grouped FC10 writes for production scan stability.</p>
 <br><br>
 
 <h3 class="exercise">Status register</h3>
@@ -128,6 +254,8 @@
 ~led(7)~ ~led(6)~ ~led(5)~ ~led(4)~ ~led(3)~ ~led(2)~ ~led(1)~ ~led(0)~
 </div>
 
+
+</div>
 
 </div>
 

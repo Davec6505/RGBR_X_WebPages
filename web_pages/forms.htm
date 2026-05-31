@@ -1,10 +1,129 @@
 <!--#include file="header.htm" -->
 <div id="content">
+<style type="text/css">
+.control-dashboard {
+    max-width: 1080px;
+}
+
+.control-hero {
+    padding: 18px;
+    border: 1px solid #cfd9e3;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #f7fbff 0%, #edf5ff 100%);
+    margin-bottom: 14px;
+}
+
+.control-hero h1 {
+    margin: 0 0 8px 0;
+    font-size: 26px;
+    line-height: 1.2;
+    color: #123f6b;
+}
+
+.control-hero p {
+    margin: 0;
+    line-height: 1.5;
+    max-width: 900px;
+}
+
+.control-callout {
+    margin: 10px 0 16px 0;
+    padding: 10px 12px;
+    border-left: 4px solid #2c6ea4;
+    background: #f3f8fd;
+    border-radius: 4px;
+    line-height: 1.5;
+}
+
+.control-pillbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.control-pill {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 14px;
+    border: 1px solid #cfe0ef;
+    background: #ffffff;
+    color: #214d73;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.control-toolbar {
+    margin-bottom: 12px;
+    padding: 12px;
+    border: 1px solid #d7e1eb;
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+.command-status {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #d7e1eb;
+    background: #f7fbff;
+    color: #214d73;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.command-status.success {
+    background: #eef8f1;
+    border-color: #cfe6d5;
+    color: #245737;
+}
+
+.command-status.error {
+    background: #fff1f0;
+    border-color: #f0c8c3;
+    color: #8a2c24;
+}
+
+.control-card {
+    border: 1px solid #d7e1eb;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(16, 44, 74, 0.05);
+}
+
+.control-card h2 {
+    color: #123f6b;
+    margin-bottom: 6px;
+}
+
+.control-card p {
+    line-height: 1.45;
+}
+
+.cmd-btn {
+    border-radius: 8px;
+    border: 1px solid #2d6fa6;
+    background: linear-gradient(180deg, #3278b2 0%, #245f93 100%);
+    color: #fff;
+    font-weight: 700;
+}
+
+.cmd-btn:hover {
+    background: linear-gradient(180deg, #3a82bf 0%, #28679f 100%);
+}
+</style>
 <div class="control-dashboard" data-default-mode="~ui_mode_default~">
     <div class="control-hero">
         <h1>Control Console</h1>
         <p>Issue shape, bitmap, text, border, and motion commands without leaving this page.</p>
+        <div class="control-pillbar">
+            <span class="control-pill">Modbus-backed actions</span>
+            <span class="control-pill">RGB565 inputs</span>
+            <span class="control-pill">Text marquee gap enabled</span>
+            <span class="control-pill">Compact and advanced modes</span>
+        </div>
     </div>
+
+    <p class="control-callout"><b>Quick start:</b> send bounds first, then style, then text or motion settings. For scrolling text, set <b>Marquee Gap</b> before sending the message payload.</p>
 
     <div class="control-toolbar">
         <div class="mode-switch" role="group" aria-label="View Mode">
@@ -121,6 +240,9 @@
                         <input type="number" id="textColor" name="textColor" placeholder="Text Color" required value="2016" data-rgb565-preview="textColorSwatch" />
                         <span id="textColorSwatch" class="color-swatch" title="Color preview"></span>
                     </div>
+
+                    <label for="rotateGap">Marquee Gap (px)</label>
+                    <input type="number" id="rotateGap" name="rotateGap" min="0" placeholder="Gap" value="4" />
                 </div>
                 <input type="hidden" name="formid" value="text_properties" />
                 <input type="submit" class="cmd-btn" value="Set Text Properties" />
