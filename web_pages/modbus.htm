@@ -2,80 +2,123 @@
 <div id="content">
 
 <h1>Modbus TCP</h1>
-<p>The LED_O display communicates via Modbus TCP to a client. See function codes below!</p>
-<h2>Function Codes in hex</h2>
+<p>LED_O is controlled through Modbus TCP using a zero-based register map (0-99).</p>
+<h2>Function Codes (Hex)</h2>
 <ul>
-	<li><b>01</b> - Set control bits 0-8.</li>
-	<li><b>03</b> - Read multiple input registers used by display 0 - 99.</li>
-	<li><b>06</b> - Write/Read single register 0 - 99.</li>
-	<li><b>10</b> - Write multiple registers to display 0 - 99.</li>
+	<li><b>01</b> - Control-bit operation used by this firmware profile.</li>
+	<li><b>03</b> - Read display-related register values (0-99).</li>
+	<li><b>06</b> - Write one holding register (single value update).</li>
+	<li><b>10</b> - Write multiple holding registers (block update).</li>
 </ul>
 
-<h2>Control register mappings</h2>
-<p>0 - 99 zero indexed registers are used to control LED_O.
-		<i>40000 - 40099 registers are not supported by this device.</i></p>
+<p><i>Note: This implementation targets the control/read behavior used by the LED_O firmware profile.</i></p>
+
+<h2>Register Addressing</h2>
+<p>All addresses on this page are <b>zero-based</b> (0-99).<br />
+	Use direct zero-based addressing for this device; 40000-style addressing is not used.</p>
+
+<h2>Control Register Map</h2>
 <br />
 <ul>
-<li><b>0 - 3 </b>: [XStart, YStart, XEnd, YEnd].</li>
-<li><b>4 - 7 </b>: [Shape, Quantity, Weight, Color].
+<li><b>0 - 3</b>: [XStart, YStart, XEnd, YEnd].
 <ul class="sub-list">
-	<li><i>Shape</i>   - [Rectangle, Circle, Triangle].</li>
-	<li><i>Quantity</i>- Shapes quantity cannot exceed the total pixel width (128) / Shape width (shape width uses [XStart - XEnd] = width).</li>
-	<li><i>Weight</i>  - Weight of the shape is the thickness of the edges in pixels.</li>
-	<li><i>Color</i>   - Color has a 16bit range, R=&lt63488-2048&gt,G=&lt2016-32&gt,B=&lt31-1&gt. Lower levels of color density are limited.</li>
+	<li>Defines geometry bounds in pixels for shapes and motion paths.</li>
+	<li>Typical sequence: set these first, then send shape/style registers.</li>
 </ul></li>
-<li><b>8 - 9 </b>: [Bitmap, Quantity]
+
+<li><b>4 - 7</b>: [Shape, Quantity, Weight, Color].
 <ul class="sub-list">
-	<li><i>Bitmaps</i>    - [Warning, Danger, ...]</li>
-	<li><i>Quantity</i>   - Quantity Cannot exceed (screen width / bitmap width),bitmaps should be either 32 pixels or 64 pixels in width.  
+	<li><i>Shape</i> - 0 = Rectangle, 1 = Triangle, 2 = Circle, 3 = Segment Line, 4 = Line.</li>
+	<li><i>Quantity</i> - Repeat count; practical max depends on width and spacing.</li>
+	<li><i>Weight</i> - Edge/line thickness in pixels.</li>
+	<li><i>Color</i> - RGB565 color value (16-bit: R5/G6/B5).</li>
 </ul></li>
-<li><b>10 - 11</b>: [Border Weight, Color]
+
+<li><b>8 - 9</b>: [Bitmap, Quantity]
 <ul class="sub-list">
-	<li><i>Border weight</i>- Places a band of n pixels in depth on the top and bottom of the display, can be used to highlight text.</li>
-	<li><i>Border color</i> - Color of the border, uses 16bit format [R=5bits,G=6bits,B=5bits], R=&lt63488-2048&gt,G=&lt2016-32&gt,B=&lt31-1&gt.</li>
+	<li><i>Bitmap</i> - Bitmap index from installed assets.</li>
+	<li><i>Quantity</i> - Repeat count constrained by display width and bitmap width.</li>
 </ul></li>
-<li><b>12 - 15</b>: [Text XPos, Text YPos, Text Color, Font type]
+
+<li><b>10 - 11</b>: [Border Weight, Border Color]
 <ul class="sub-list">
-	<li>Text x and y postioins in pixels, Y position will can be used to centralize the text.</li>
-	<li>Font color uses 16bit format [R=5bits,G=6bits,B=5bits], R=&lt63488-2048&gt,G=&lt2016-32&gt,B=&lt31-1&gt.</li>
+	<li><i>Border Weight</i> - Top and bottom band thickness in pixels.</li>
+	<li><i>Border Color</i> - RGB565 color value.</li>
 </ul></li>
-<li><b>16 - 17</b>: [SI Unit, Decimal place].
+
+<li><b>12 - 15</b>: [Text XPos, Text YPos, Text Color, Font Type]
 <ul class="sub-list">
-	<li><i>SI Unit</i>   - ["*C","*F","g","Kg","T","ml","l","%","ms","mm","rpm"] value of index controls SI Unit displayed.</li>
-	<li><i>Decimal</i>   - Sets the floating point accuracy in decimal places, max = 4.
+	<li><i>Text XPos / YPos</i> - Text anchor position in pixels.</li>
+	<li><i>Text Color</i> - RGB565 color value.</li>
+	<li><i>Font Type</i> - Font selector index/value.</li>
 </ul></li>
-<li><b>18 - 23</b>: [LO-Limit, Hi-Limit, Alarm Lo-Limit, Alarm Hi-Limit, Alarm Lo-Limit Color, Alarm Hi-Color].
+
+<li><b>16 - 17</b>: [SI Unit, Decimal Place].
 <ul class="sub-list">
-	<li><i>Lo-Limit / Hi-Limit</i>- Scale the Bar graph displayed for analog values, [...].
-	<li><i>Alarm Limits</i>       - Set the limits from the analog value to change color of the bar graph.
-	<li><i>Alarm Colors</i>       - Shape colors apply for alarm indications.
+	<li><i>SI Unit</i> - Index into unit list: ["*C","*F","g","Kg","T","ml","l","%","ms","mm","rpm"].</li>
+	<li><i>Decimal Place</i> - Numeric precision for formatted values (recommended max: 4).</li>
 </ul></li>
-<li><b>24 - 25</b>: [Rotation direction, Rotation speed].
+
+<li><b>18 - 23</b>: [LO Limit, HI Limit, Alarm LO, Alarm HI, Alarm LO Color, Alarm HI Color].
 <ul class="sub-list">
-	<li><i>Direction</i>          - 0 = Left to right -&gt, 1 = right to left &lt-.</li>
-	<li><i>Speed</i>			  - Speed is delay time between frames, fastest = 1, &gt 1 slows speed according to complexity of frame.</li>
+	<li>Defines graph scaling and threshold-based alarm color behavior.</li>
 </ul></li>
-<li><b>26 - 27</b>: [Fill Screen, Fill color].
+
+<li><b>24 - 25</b>: [Rotation Direction, Rotation Speed].
 <ul class="sub-list">
-	<li><i>Fill</i>				  - Fill the screen with one color.</li>
-	<li><i>Color</li>i>		      - Indipendant color to fill the screen. uses 16bit format [R=5bits,G=6bits,B=5bits], R=&lt63488-2048&gt,G=&lt2016-32&gt,B=&lt31-1&gt.</li>
+	<li><i>Direction</i> - 0 = left-to-right, 1 = right-to-left.</li>
+	<li><i>Speed</i> - Frame-delay control. 0 disables rotation; 1 is fastest.</li>
 </ul></li>
+
+<li><b>26 - 27</b>: [Fill Screen, Fill Color].
+<ul class="sub-list">
+	<li><i>Fill Screen</i> - 0 = off, 1 = on.</li>
+	<li><i>Fill Color</i> - RGB565 color value.</li>
+</ul></li>
+
+<li><b>28</b>: [Text Marquee Gap].
+	<ul class="sub-list">
+		<li><i>Text Marquee Gap</i> - Pixel spacing inserted between repeats of long scrolling text.</li>
+		<li>Use lower values for tighter loops and higher values for clearer separation.</li>
+	</ul></li>
+
+<li><b>29</b>: [Reserved].</li>
+
 <li><b>30 - 59</b>: [Text].
 	<ul class="sub-list">
-		<li><i>Text</i>           - 30 characters max in buffer. display will only show +/- 16 depending on the font selected.</li>
+		<li><i>Text</i> - Message payload area.</li>
+		<li>Current firmware path supports up to 59 visible characters plus null terminator safety.</li>
 	</ul></li>
-<li><b>60 - 79</b>: [Integer values].
+
+<li><b>60 - 79</b>: [Integer Values].
 	<ul class="sub-list">
-		<li><i>Integer</i>        - 10 holding integer values but only the 1st interger value at #60 will be displayed.</li>
+		<li><i>Integer</i> - Integer holding-value area; primary displayed value starts at register 60.</li>
 	</ul></li>
-<li><b>80 - 89</b>: [Real values].
+
+<li><b>80 - 89</b>: [Real Values].
 	<ul class="sub-list">
-		<li><i>Read & Write</i>   - 2 holding real values, but only the 1st real value at #80 will be displayed.</li>
+		<li><i>Read/Write</i> - Real-value area; primary displayed value starts at register 80.</li>
 	</ul></li>
-<li><b>90 - 99</b>: [Real values].
+
+<li><b>90 - 99</b>: [Real Values].
 	<ul class="sub-list">
-		<li><i>Read only</i>      - 2 read only real values none will be displayed, reserved for future use.</li>
+		<li><i>Read-Only</i> - Reserved for extended/status use.</li>
 	</ul></li>
+</ul>
+
+<h2>Recommended Write Sequence</h2>
+<ul>
+	<li>Set geometry first (0-3), then style/color (4-7), then motion/fill/text options.</li>
+	<li>Use <b>06</b> for low-frequency single-register edits and <b>10</b> for grouped updates that must stay coherent on screen.</li>
+	<li>For text updates, write properties (12-15 and 28), then write payload (30-59).</li>
+	<li>Use rotation speed 0 when staging a multi-step update if you want to avoid visible in-between frames.</li>
+</ul>
+
+<h2>PLC Integration Notes</h2>
+<ul>
+	<li>Treat this as a zero-based holding-register map in your PLC tag layer.</li>
+	<li>For deterministic scan behavior, group related writes into one FC10 transaction whenever possible.</li>
+	<li>If your PLC uses 40001-style addressing, apply your driver offset so it targets register 0-99 on this device.</li>
 </ul>
 <br><br>
 
