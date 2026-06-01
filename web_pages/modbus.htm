@@ -125,6 +125,38 @@
 	color: #244e72;
 	margin-left: 6px;
 }
+
+.status-map {
+	width: 100%;
+	border-collapse: collapse;
+	margin-top: 8px;
+	background: #ffffff;
+	border: 1px solid #d7e1eb;
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+.status-map th,
+.status-map td {
+	border: 1px solid #dfe7ef;
+	padding: 7px 9px;
+	text-align: left;
+	font-size: 13px;
+}
+
+.status-map th {
+	background: #f3f8fd;
+	color: #123f66;
+	font-weight: 700;
+}
+
+.status-label {
+	margin-top: 8px;
+	padding: 8px 10px;
+	border-left: 4px solid #2d6fa6;
+	background: #f3f8fd;
+	border-radius: 4px;
+}
 </style>
 
 <div class="modbus-shell">
@@ -249,8 +281,20 @@
 <p class="modbus-note"><b>Commissioning tip:</b> Start with FC06 for step-by-step verification, then migrate to grouped FC10 writes for production scan stability.</p>
 <br><br>
 
-<h3 class="exercise">Status register</h3>
-<p class="examplebox">[String,Shape,Bitmap,Direction,Border,Fill,Clear,Rotate]</p>
+<h3 class="exercise">Runtime Status Bits (Readback)</h3>
+<p class="status-label">Bit order is shown from <b>7</b> (left) to <b>0</b> (right).</p>
+<table class="status-map">
+	<tr><th>Bit</th><th>Name</th><th>Meaning (when set)</th></tr>
+	<tr><td>7</td><td>String</td><td>Text/string path is active.</td></tr>
+	<tr><td>6</td><td>Shape</td><td>Shape rendering path is active.</td></tr>
+	<tr><td>5</td><td>Bitmap</td><td>Bitmap display path is active.</td></tr>
+	<tr><td>4</td><td>Direction</td><td>Direction control bit is active.</td></tr>
+	<tr><td>3</td><td>Border</td><td>Border feature is active.</td></tr>
+	<tr><td>2</td><td>Fill</td><td>Fill feature is active.</td></tr>
+	<tr><td>1</td><td>Clear</td><td>Clear operation flag is active.</td></tr>
+	<tr><td>0</td><td>Rotate</td><td>Rotation path is active.</td></tr>
+</table>
+<p class="examplebox">Visual bit display [7..0]: [String, Shape, Bitmap, Direction, Border, Fill, Clear, Rotate]</p>
 <div class="examplebox code" style="letter-spacing: 10px">
 ~led(7)~ ~led(6)~ ~led(5)~ ~led(4)~ ~led(3)~ ~led(2)~ ~led(1)~ ~led(0)~
 </div>
