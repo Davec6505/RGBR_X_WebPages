@@ -133,10 +133,11 @@
 <p class="modbus-lead">LED_O is controlled through Modbus TCP using a zero-based register map (0-99). This page is designed for quick PLC implementation and commissioning reference.</p>
 <h2>Function Codes (Hex)</h2>
 <ul class="fc-list">
-	<li><span class="fc-badge">01</span> Control-bit operation used by this firmware profile.</li>
-	<li><span class="fc-badge">03</span> Read display-related register values (0-99).</li>
+	<li><span class="fc-badge">01</span> Read control-bit registers 0-1 (2 bytes / 16 bits in this firmware profile).</li>
+	<li><span class="fc-badge">03</span> Read holding registers 0-99.</li>
+	<li><span class="fc-badge">04</span> Read input registers 0-99.</li>
 	<li><span class="fc-badge">06</span> Write one holding register (single value update).</li>
-	<li><span class="fc-badge">10</span> Write multiple holding registers (block update).</li>
+	<li><span class="fc-badge">10</span> Write multiple holding registers 0-99 (block update).</li>
 </ul>
 
 <p><i>Note: This implementation targets the control/read behavior used by the LED_O firmware profile.</i></p>
