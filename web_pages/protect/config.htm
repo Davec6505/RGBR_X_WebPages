@@ -34,6 +34,50 @@ connectivity.  Recovery options will be provided on the next page.</p>
 <div><input type="submit" class="sm" value="Restart Interface" /></div>
 </fieldset>
 </form>
+
+<div style="margin-top:24px; padding:14px 16px; border:1px solid #c8d8e8; border-radius:8px; background:#f5faff;">
+  <h3 style="margin:0 0 8px 0; font-size:15px; color:#123f6b;">&#128193; SD Card File Access (FTP)</h3>
+  <p style="margin:0 0 8px 0; font-size:13px;">
+    The device SD card is accessible via FTP at <strong>ftp://~config_ip~</strong><br/>
+    Username: <code>admin</code> &nbsp; Password: <code>admin</code>
+  </p>
+  <p style="margin:0 0 4px 0; font-size:13px;">
+    Browsers no longer support FTP. Use <strong>FileZilla</strong> (free FTP client):
+    <a href="https://filezilla-project.org/download.php?type=client" target="_blank">Download FileZilla</a>
+  </p>
+  <p style="margin:0; font-size:12px; color:#555;">
+    In FileZilla: Host&nbsp;<code>~config_ip~</code> &nbsp;&#8212;&nbsp; Port&nbsp;<code>21</code> &nbsp;&#8212;&nbsp; User&nbsp;<code>admin</code> &nbsp;&#8212;&nbsp; Pass&nbsp;<code>admin</code> &nbsp;&rarr;&nbsp; Quickconnect
+  </p>
+</div>
+
+<div style="margin-top:16px; padding:14px 16px; border:1px solid #c8d8e8; border-radius:8px; background:#f5faff;">
+  <h3 style="margin:0 0 8px 0; font-size:15px; color:#123f6b;">&#128274; HTTPS Certificate</h3>
+  <p style="margin:0 0 8px 0; font-size:13px;">
+    The device uses a self-signed TLS certificate. Access it at:
+    <strong>https://~config_ip~</strong>
+  </p>
+
+  <p style="margin:0 0 4px 0; font-size:13px;"><strong>Optional: access by hostname (<code>https://led-o</code>)</strong></p>
+  <p style="margin:0 0 8px 0; font-size:13px;">
+    Browsers use DNS — not NetBIOS — for HTTPS, so <code>led-o</code> won't resolve automatically.
+    To enable hostname access, add one line to your PC's hosts file:
+  </p>
+  <pre style="margin:0 0 8px 0; padding:6px 10px; background:#eef4ff; border-radius:4px; font-size:12px;">~config_ip~   led-o</pre>
+  <p style="margin:0 0 8px 0; font-size:12px; color:#555;">
+    Hosts file location: <code>C:\Windows\System32\drivers\etc\hosts</code> (requires Administrator).<br/>
+    After adding the entry, <code>https://led-o</code> will work from that PC.
+  </p>
+
+  <p style="margin:8px 0 4px 0; font-size:13px;"><strong>If you change the IP address:</strong></p>
+  <ol style="margin:0 0 8px 0; font-size:13px; padding-left:20px;">
+    <li>FTP to the device at <code>ftp://~config_ip~</code> and download <code>scripts/Regenerate-DeviceCert.ps1</code></li>
+    <li>Run it on a Windows PC that holds <code>device.key</code>:<br/>
+        <code>.\Regenerate-DeviceCert.ps1 -IP &lt;new-ip&gt;</code></li>
+    <li>Rebuild firmware (<code>make build</code>) and reflash.</li>
+    <li>Update your hosts file entry and re-import <code>device.crt</code> into your trust store.</li>
+  </ol>
+</div>
+
 </div>
 
 <script language="javascript">
