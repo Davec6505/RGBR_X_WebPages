@@ -182,6 +182,7 @@
 	<b>Quick Navigation</b>
 	<ul>
 		<li><a href="#regmap">Control Register Map</a></li>
+		<li><a href="#bitmap">Control Bit Registers (0-1)</a></li>
 		<li><a href="#group-0-3">0-3 Geometry</a></li>
 		<li><a href="#group-4-7">4-7 Shape Style</a></li>
 		<li><a href="#group-8-11">8-11 Bitmap/Border</a></li>
@@ -194,6 +195,32 @@
 </div>
 
 <h2 id="regmap">Control Register Map</h2>
+
+<h2 id="bitmap">Control Bit Registers (FC01 Read, FC05/FC15 Write)</h2>
+<p>Control bits are organized in two bytes (register 0 and register 1). Bit order is shown from <b>7</b> (left) to <b>0</b> (right).</p>
+
+<h3>Control Byte 0 (register 0)</h3>
+<table class="status-map">
+	<tr><th>Bit</th><th>Name</th><th>Meaning (when set)</th></tr>
+	<tr><td>7</td><td>String</td><td>Text/string path is active.</td></tr>
+	<tr><td>6</td><td>Shape</td><td>Shape rendering path is active.</td></tr>
+	<tr><td>5</td><td>Bitmap</td><td>Bitmap display path is active.</td></tr>
+	<tr><td>4</td><td>Direction</td><td>Direction control bit is active.</td></tr>
+	<tr><td>3</td><td>Border</td><td>Border feature is active.</td></tr>
+	<tr><td>2</td><td>Fill</td><td>Fill feature is active.</td></tr>
+	<tr><td>1</td><td>Clear</td><td>Clear operation flag is active.</td></tr>
+	<tr><td>0</td><td>Rotate</td><td>Rotation path is active.</td></tr>
+</table>
+
+<h3>Control Byte 1 (register 1)</h3>
+<table class="status-map">
+	<tr><th>Bit</th><th>Name</th><th>Meaning</th></tr>
+	<tr><td>3</td><td>Orientation 180</td><td>Display output is rotated 180 degrees (upside-down mount support).</td></tr>
+	<tr><td>2</td><td>Float</td><td>Reserved/firmware internal control in current profile.</td></tr>
+	<tr><td>1</td><td>Fill Screen</td><td>Reserved/firmware internal control in current profile.</td></tr>
+	<tr><td>0</td><td>Scaling</td><td>Reserved/firmware internal control in current profile.</td></tr>
+</table>
+<p class="modbus-note"><b>Orientation control:</b> write byte1 bit3 = <b>1</b> for upside-down (180), or <b>0</b> for normal orientation.</p>
 
 <details class="reg-group" id="group-0-3" open>
 	<summary>0 - 3: Geometry <span class="chip">XStart/YStart/XEnd/YEnd</span></summary>
@@ -281,8 +308,8 @@
 <p class="modbus-note"><b>Commissioning tip:</b> Start with FC06 for step-by-step verification, then migrate to grouped FC10 writes for production scan stability.</p>
 <br><br>
 
-<h3 class="exercise">Runtime Status Bits (Readback)</h3>
-<p class="status-label">Bit order is shown from <b>7</b> (left) to <b>0</b> (right).</p>
+<h3 class="exercise">Runtime Status Bits (Readback, Byte 0)</h3>
+<p class="status-label">Bit order is shown from <b>7</b> (left) to <b>0</b> (right). For orientation control bit details, see Control Byte 1 above.</p>
 <table class="status-map">
 	<tr><th>Bit</th><th>Name</th><th>Meaning (when set)</th></tr>
 	<tr><td>7</td><td>String</td><td>Text/string path is active.</td></tr>

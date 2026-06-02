@@ -282,7 +282,7 @@
 
         <section class="control-card advanced-card">
             <h2>Rotation</h2>
-            <p>Set direction and speed. Use speed 0 to disable rotation.</p>
+            <p>Set direction, speed, and simple upside-down orientation latch. Use speed 0 to disable rotation.</p>
             <form method="get" action="forms.htm" onsubmit="return controlSubmitForm(this);">
                 <div class="field-grid two-col">
                     <label for="rotateDir">Direction (0 left, 1 right)</label>
@@ -290,6 +290,12 @@
 
                     <label for="rotateSpeed">Rotate Speed</label>
                     <input type="number" id="rotateSpeed" name="rotateSpeed" min="0" placeholder="Speed" />
+
+                    <label for="orientation180">Screen Orientation</label>
+                    <select id="orientation180" name="orientation180">
+                        <option value="0" selected>Normal</option>
+                        <option value="1">Upside-down (180)</option>
+                    </select>
                 </div>
                 <input type="hidden" name="formid" value="rotate" />
                 <input type="submit" class="cmd-btn" value="Set Rotation" />
