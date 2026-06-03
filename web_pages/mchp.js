@@ -1,4 +1,4 @@
-// Copyright � 2002-2010 Microchip Technology Inc.  All rights reserved.
+// Copyright � 2002-2010 Microchip Technology Inc.  All rights reserved.
 // See Microchip TCP/IP Stack documentation for license information.
 
 // Determines when a request is considered "timed out"
@@ -80,8 +80,8 @@ function pollAJAX() {
 			if(typeof(curAjax.container) == 'function'){
 				curAjax.container(null);
 			} else {
-				// Alert the user
-				alert("Command failed.\nConnection to development board was lost.");
+				// Show reconnect overlay instead of a blocking alert
+				showReconnectOverlay();
 			}
 
 	    	curAjax.ajaxReq.abort();
@@ -115,3 +115,67 @@ function getXMLValue(xmlData, field) {
 
 // Kick off the AJAX Updater
 setTimeout("pollAJAX()", 500);
+
+// ---------------------------------------------------------------------------
+// Reconnect overlay — shown when the device goes away (flash/reboot).
+// Polls a lightweight HEAD request every 2 s; reloads when it comes back.
+// ---------------------------------------------------------------------------
+var _reconnectActive = false;
+
+function showReconnectOverlay() {
+    if (_reconnectActive) return;
+    _reconnectActive = true;
+
+    // Build overlay
+    var ov = document.createElement('div');
+    ov.id = 'led-reconnect-overlay';
+    ov.style.cssText = [
+        'position:fixed','top:0','left:0','width:100%','height:100%',
+        'background:rgba(0,0,0,0.72)','z-index:9999',
+        'display:flex','flex-direction:column',
+        'align-items:center','justify-content:center',
+        'font-family:sans-serif','color:#fff'
+    ].join(';');
+
+    var msg = document.createElement('div');
+    msg.style.cssText = 'font-size:1.3em;margin-bottom:1em;';
+    msg.textContent = 'Device restarting\u2026';
+
+    var dots = document.createElement('div');
+    dots.style.cssText = 'font-size:2em;letter-spacing:0.3em;';
+    dots.textContent = '\u25cf \u25cf \u25cf';
+
+    ov.appendChild(msg);
+    ov.appendChild(dots);
+    document.body.appendChild(ov);
+
+    // Animate dots
+    var dotStates = ['\u25cf \u25cb \u25cb', '\u25cb \u25cf \u25cb', '\u25cb \u25cb \u25cf'];
+    var di = 0;
+    var dotTimer = setInterval(function() {
+        dots.textContent = dotStates[di % 3];
+        di++;
+    }, 400);
+
+    // Poll until device answers, then reload
+    function tryReconnect() {
+        fetch(window.location.origin + '/index.htm', {
+            method: 'HEAD',
+            cache: 'no-store',
+            signal: AbortSignal.timeout(3000)
+        }).then(function(r) {
+            if (r.ok || r.status === 401 || r.status === 302) {
+                clearInterval(dotTimer);
+                msg.textContent = 'Reconnected! Reloading\u2026';
+                setTimeout(function() { window.location.reload(); }, 500);
+            } else {
+                setTimeout(tryReconnect, 2000);
+            }
+        }).catch(function() {
+            setTimeout(tryReconnect, 2000);
+        });
+    }
+
+    // Wait 3 s before first probe — give the device time to boot
+    setTimeout(tryReconnect, 3000);
+}
