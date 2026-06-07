@@ -22,7 +22,7 @@
 </ol>
 </p>
 
-<form action="upload.htm" method="post" enctype="multipart/form-data">
+<form action="upload.htm" method="post" enctype="multipart/form-data" onsubmit="return confirmUpload(this);">
 
 <div class="examplebox" id="display">
 <p style="margin-bottom: 2px"><b>File: </b>&nbsp;
@@ -151,6 +151,22 @@ function listBmps(xmlData, val) {
 }
 
 setTimeout("newAJAXCommand('status.xml',updateList, false)",500);
+
+function confirmUpload(form) {
+    var f = form.querySelector('input[name="md5file"]');
+    if (!f || !f.value) {
+        alert('Please select a .bmp file to upload.');
+        return false;
+    }
+    return confirm(
+        'IMPORTANT: If a bitmap with this name already exists on the SD card the upload will be blocked.\n\n' +
+        'To replace an existing bitmap:\n' +
+        '  1. Click Cancel\n' +
+        '  2. Enter the bitmap name in the REMOVE box below and click REMOVE\n' +
+        '  3. Then upload the new file\n\n' +
+        'Click OK to continue with the upload.'
+    );
+}
 </script>
 <script type="text/javascript">
 <!--
