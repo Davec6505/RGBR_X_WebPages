@@ -131,6 +131,21 @@
 
 <p class="overview-note">For complete technical details, refer to the LED_O product manual.</p>
 
+<p class="overview-note" style="border-left-color:#b85c00; background:#fff8f2;">
+	<b>PLC control mode:</b> When a PLC or Modbus client actively controls the display,
+	web commands, file uploads, and FTP access are disabled. The amber banner at the top of each
+	page will appear while PLC control is active. These features restore automatically when the
+	PLC releases control.
+</p>
+
+<p class="overview-note" style="border-left-color:#c0392b; background:#fff5f5;">
+	<b>&#9888; Power loss warning:</b> If power is removed while a file upload is in progress,
+	the SD card may be left in a corrupted state. If the device fails to load assets or read
+	configuration after an unexpected power loss, remove the SD card, reformat it as FAT32,
+	and restore the <code>protect/</code> folder contents from a known-good backup before
+	reinserting.
+</p>
+
 </div>
 
 <script type="text/javascript">
