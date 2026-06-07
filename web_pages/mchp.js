@@ -179,3 +179,56 @@ function showReconnectOverlay() {
     // Wait 3 s before first probe — give the device time to boot
     setTimeout(tryReconnect, 3000);
 }
+
+// ---------------------------------------------------------------------------
+// PLC mode poller — polls status.xml every 3 s.
+// Shows the amber banner and disables all interactive elements when
+// plc_mode == "1" (APP_TCPIP_SERVING_CONNECTION active on device).
+// Hides banner and re-enables controls when plc_mode returns "0".
+// ---------------------------------------------------------------------------
+(function() {
+    var _plcActive = false;
+
+    function _setInteractiveDisabled(disabled) {
+        var tags = ['input', 'select', 'textarea', 'button'];
+        var i, j, els;
+        for (i = 0; i < tags.length; i++) {
+            els = document.body.getElementsByTagName(tags[i]);
+            for (j = 0; j < els.length; j++) {
+                if (disabled) {
+                    els[j].setAttribute('data-plc-disabled', '1');
+                    els[j].disabled = true;
+                } else if (els[j].getAttribute('data-plc-disabled') === '1') {
+                    els[j].removeAttribute('data-plc-disabled');
+                    els[j].disabled = false;
+                }
+            }
+        }
+        var banner = document.getElementById('plc-banner');
+        if (banner) { banner.style.display = disabled ? 'block' : 'none'; }
+    }
+
+    function _pollPlcMode() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/status.xml', true);
+        xhr.timeout = 3000;
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState !== 4) { return; }
+            if (xhr.status === 200 && xhr.responseXML) {
+                var node = xhr.responseXML.getElementsByTagName('plc_mode')[0];
+                var mode = node ? node.textContent || node.innerText || '' : '0';
+                var isPlc = (mode.trim() === '1');
+                if (isPlc !== _plcActive) {
+                    _plcActive = isPlc;
+                    _setInteractiveDisabled(isPlc);
+                }
+            }
+            setTimeout(_pollPlcMode, 3000);
+        };
+        xhr.ontimeout = function() { setTimeout(_pollPlcMode, 3000); };
+        xhr.send();
+    }
+
+    // Start after initial page settle
+    setTimeout(_pollPlcMode, 1000);
+})();
