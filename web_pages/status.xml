@@ -11,4 +11,5 @@
 <pot1>~bmps~</pot1>
 <pot2>~bmp_num~</pot2>
 <plc_mode>~plc_mode~</plc_mode>
+<fw_version>~version~</fw_version>
 </response>

@@ -222,6 +222,12 @@ function showReconnectOverlay() {
                     _plcActive = isPlc;
                     _setInteractiveDisabled(isPlc);
                 }
+                // Populate firmware version in footer on first successful response.
+                var verSpan = document.getElementById('fw-version');
+                if (verSpan && verSpan.textContent === '...') {
+                    var verNode = xhr.responseXML.getElementsByTagName('fw_version')[0];
+                    if (verNode) { verSpan.textContent = verNode.textContent || verNode.innerText || ''; }
+                }
             }
             setTimeout(_pollPlcMode, 3000);
         };

@@ -110,18 +110,14 @@ function updateList(xmlData) {
 function updateList_(xmlData) {
     if (!xmlData) {
         alert("No xml data!");
+        return;
     }
     var ol = document.getElementById("pot1").innerHTML; // Get the number of bitmaps
     var num_bmps = parseInt(ol, 10); // Convert to an integer
+    // get_bmp.xml contains all bmp names in a single response — use xmlData directly
+    // rather than firing N parallel requests (which would exhaust the 4-connection pool).
     for (var i = 0; i < num_bmps; i++) {
-
-		//listBmps(xmlData, i); // Call listBmps with the current index
-        // Use a closure to pass the second argument (i)
-        (function(index) {
-            newAJAXCommand('get_bmp.xml', function(xmlData) {
-                listBmps(xmlData, index); // Pass the response and the index
-            });
-        })(i);
+        listBmps(xmlData, i);
     }
 }
 

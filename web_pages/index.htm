@@ -19,11 +19,6 @@
 </div-->
 
 
-<table style="padding-left: 10px;">
-<tr><td><b>LED_O Version:</b></td><td>&nbsp;</td><td>~version~</td></tr>
-<tr><td><b>Build Date:</b></td><td>&nbsp;</td><td>~builddate~</td></tr>
-</table>
-
 <style type="text/css">
 .overview-hero {
 	margin: 16px 0 22px 0;
@@ -144,6 +139,20 @@
 	configuration after an unexpected power loss, remove the SD card, reformat it as FAT32,
 	and restore the <code>protect/</code> folder contents from a known-good backup before
 	reinserting.
+</p>
+
+<p class="overview-note" style="border-left-color:#2d7a4f; background:#f4fcf7;">
+	<b>&#8505; Display behaviour during web page load:</b> LED_O is a single-core embedded
+	device. All network communication &mdash; the web server, Modbus TCP, and display rendering
+	&mdash; shares the same processor. When you browse into this interface, you may notice
+	multiple short pauses in scroll or rotation as the page loads and the browser fires its
+	background status requests. Each pause lasts
+	less than 200&nbsp;ms and rotation resumes automatically. This is an architectural
+	characteristic of the hardware platform, not a software defect. <b>It has no effect on
+	PLC or Modbus TCP communication, process data integrity, or display content.</b> The web
+	interface is intended for commissioning, configuration, and asset management &mdash; not
+	for use alongside time-critical PLC sequences. If uninterrupted display motion is required
+	during a critical operation, close the browser tab beforehand.
 </p>
 
 </div>
