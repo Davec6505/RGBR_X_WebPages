@@ -1,39 +1,44 @@
 <#
 .SYNOPSIS
-    Regenerates the HTTPS TLS certificate embedded in the firmware.
+    Regenerates the HTTPS TLS certificate embedded in the firmware (cert only, reuses key).
 
 .DESCRIPTION
-    Run this when the device IP address changes or the cert is near expiry.
-    The private key (device.key) is reused — only the cert changes.
+    Run this when the cert is near expiry or the CN/SAN needs updating.
+    Requires device.key and device_key.der to already exist (run ECDSA-P-256-DeviceCert.ps1
+    once to generate them).
+
+    The SAN contains DNS names only (led-o, led-o.local) — no IP address.
+    This means the cert remains valid even if the device IP changes via SD CONFIG.txt.
+    Access via https://led-o (add the device IP to hosts file) or https://led-o.local.
+    Direct https://<IP> will always show a browser warning — this is intentional.
+
     After running, rebuild and reflash the firmware:
         make build
     Then re-import device.crt into your browser/OS trust store.
 
-.PARAMETER IP
-    The device IP address to embed in the cert SAN. Default: 10.0.0.49
-
 .EXAMPLE
     .\Regenerate-DeviceCert.ps1
-    .\Regenerate-DeviceCert.ps1 -IP 192.168.1.50
 #>
-param(
-    [string]$IP = "10.0.0.49"
-)
+param()
 
 $RepoRoot = Split-Path $PSScriptRoot -Parent
 Push-Location $RepoRoot
 
 try {
     if (-not (Test-Path "device.key")) {
-        Write-Error "device.key not found in repo root. Cannot regenerate without the private key."
+        Write-Error "device.key not found in repo root. Run scripts\ECDSA-P-256-DeviceCert.ps1 first to generate key and cert."
+        exit 1
+    }
+    if (-not (Test-Path "device_key.der")) {
+        Write-Error "device_key.der not found. Run scripts\ECDSA-P-256-DeviceCert.ps1 first."
         exit 1
     }
 
-    Write-Host "Generating cert for CN=led-o SAN=DNS:led-o,DNS:led-o.local,IP:$IP ..."
+    Write-Host "Generating cert for CN=led-o SAN=DNS:led-o,DNS:led-o.local (no IP) ..."
 
     openssl req -new -x509 -key device.key -out device.crt -days 3650 `
-        -subj "/CN=led-o/O=LED-O/C=AU" `
-        -addext "subjectAltName=DNS:led-o,DNS:led-o.local,IP:$IP"
+        -subj "/CN=led-o/O=Milands Electronic Solutions/C=AU" `
+        -addext "subjectAltName=DNS:led-o,DNS:led-o.local"
 
     if ($LASTEXITCODE -ne 0) { Write-Error "openssl failed"; exit 1 }
 
@@ -57,15 +62,17 @@ try {
     }
 
     $header = @"
-/* Device self-signed cert - CN=led-o, SAN=DNS:led-o,DNS:led-o.local,IP:$IP
- * Generated $(Get-Date -Format 'yyyy-MM-dd') with key device.key (RSA-2048, SHA-256, valid 10yr)
- * Re-generate if IP changes: run scripts\Regenerate-DeviceCert.ps1 -IP <NEW_IP>
+/* Device self-signed cert — ECDSA P-256, SHA-256
+ * CN=led-o, O=Milands Electronic Solutions, SAN=DNS:led-o,DNS:led-o.local
+ * No IP SAN — cert remains valid when device IP changes via SD CONFIG.txt.
+ * Generated $(Get-Date -Format 'yyyy-MM-dd') (valid 10 years)
+ * Re-generate: run scripts\Regenerate-DeviceCert.ps1 (cert only) or ECDSA-P-256-DeviceCert.ps1 (full)
  */
-$(To-CArray $certBytes "device_cert_der_2048")
-static const int sizeof_device_cert_der_2048 = $certLen;
+$(To-CArray $certBytes "device_cert_der_ecc")
+static const int sizeof_device_cert_der_ecc = $certLen;
 
-$(To-CArray $keyBytes "device_key_der_2048")
-static const int sizeof_device_key_der_2048 = $keyLen;
+$(To-CArray $keyBytes "device_key_der_ecc")
+static const int sizeof_device_key_der_ecc = $keyLen;
 "@
 
     $outPath = "incs\config\default\net_pres\pres\device_cert_arrays.h"
@@ -76,6 +83,9 @@ static const int sizeof_device_key_der_2048 = $keyLen;
     Write-Host "  1. make build"
     Write-Host "  2. Flash bins/RGBR_MZ_X.hex"
     Write-Host "  3. Re-import device.crt into your OS/browser trust store"
+    Write-Host ""
+    Write-Host "Access via: https://led-o  (add device IP to hosts file)"
+    Write-Host "Note: https://<IP> will always show a browser warning (no IP SAN)."
 }
 finally {
     Pop-Location
