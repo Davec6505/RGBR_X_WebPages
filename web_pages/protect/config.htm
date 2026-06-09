@@ -78,9 +78,50 @@ connectivity.  Recovery options will be provided on the next page.</p>
   </ol>
 </div>
 
+<div style="margin-top:16px; padding:14px 16px; border:1px solid #c0392b; border-radius:8px; background:#fff5f5;">
+  <h3 style="margin:0 0 8px 0; font-size:15px; color:#922b21;">&#9888; Firmware Update (SD Card Bootloader)</h3>
+  <p style="margin:0 0 8px 0; font-size:13px;">
+    Upload a versioned firmware binary (e.g. <code>v1.0.0_led_o.bin</code>) to the SD card.
+    The file name must end with <code>led_o.bin</code>. On next reboot the bootloader will
+    flash it and restart automatically. <strong>Do not power off during the update.</strong>
+  </p>
+  <p style="margin:0 0 10px 0; font-size:13px; color:#922b21;">
+    <strong>Warning:</strong> uploading an invalid binary will brick the device until it is
+    reflashed via debugger.
+  </p>
+  <form method="post" action="/protect/firmware.htm" enctype="multipart/form-data"
+        onsubmit="return confirmFirmwareUpload(this);">
+    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+      <input type="file" name="firmware" accept=".bin" style="font-size:13px;" />
+      <input type="submit" class="sm" value="Upload Firmware"
+             style="background:#c0392b; color:#fff; border:none; padding:6px 14px; border-radius:4px; cursor:pointer;" />
+    </div>
+  </form>
+  <p style="margin:8px 0 0 0; font-size:12px; color:#555;">
+    The file is stored on the SD card as <code>FIRMWARE.BIN</code> (renamed automatically).
+    If <code>FIRMWARE.BIN</code> already exists the upload will be skipped — delete it via FTP first.
+    After a successful flash the file is removed automatically.
+  </p>
+</div>
+
 </div>
 
 <script language="javascript">
+
+function confirmFirmwareUpload(form) {
+  var f = form.firmware;
+  if (!f || !f.value) { alert('Please select a firmware .bin file first.'); return false; }
+  var name = f.value.split(/[\\/]/).pop();
+  if (name.toLowerCase().indexOf('led_o.bin') === -1) {
+    alert('File name must end with led_o.bin\n(e.g. v1.0.0_led_o.bin).'); return false;
+  }
+  return confirm(
+    'WARNING: This will write a new firmware image to the SD card.\n' +
+    'The device will flash and reboot on next power cycle.\n\n' +
+    'An invalid binary will require flash tool recovery.\n\n' +
+    'Upload "' + name + '" now?'
+  );
+}
 
 function configIPBoxes() {
 	e = document.forms.config;
