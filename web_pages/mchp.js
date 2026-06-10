@@ -139,7 +139,7 @@ function showReconnectOverlay() {
 
     var msg = document.createElement('div');
     msg.style.cssText = 'font-size:1.3em;margin-bottom:1em;';
-    msg.textContent = 'Device restarting\u2026';
+    msg.textContent = 'Reconnecting to device\u2026';
 
     var dots = document.createElement('div');
     dots.style.cssText = 'font-size:2em;letter-spacing:0.3em;';
@@ -176,8 +176,8 @@ function showReconnectOverlay() {
         });
     }
 
-    // Wait 3 s before first probe — give the device time to boot
-    setTimeout(tryReconnect, 3000);
+    // Wait 1.5 s before first probe — gives device time to reboot but recovers faster on connection lockup
+    setTimeout(tryReconnect, 1500);
 }
 
 // ---------------------------------------------------------------------------
